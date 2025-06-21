@@ -1,4 +1,4 @@
-import { Register } from '@/@types/register.js';
+import { Register } from '@/@types/register.ts';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
