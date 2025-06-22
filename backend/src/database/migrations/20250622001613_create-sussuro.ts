@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
       .references('id')
       .inTable('eco')
       .onDelete('CASCADE'); // FK para eco
-    table.string('conteudo').notNullable();
+    table.string('conteudo', 144).notNullable();
     table.timestamps(true, true); // created_at e updated_at
   });
 }
