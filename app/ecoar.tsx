@@ -1,8 +1,7 @@
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,7 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ErrorModal from './components/ErrorModal';
+import SuccessModal from './components/SuccessModal';
 import ThreadInput from './components/ThreadInput';
+import useEcoForm from './hooks/useEcoForm';
 
 // Tags disponíveis (mesmo array do index.tsx)
 const TAGS_DISPONIVEIS = [
@@ -29,27 +31,13 @@ const TAGS_DISPONIVEIS = [
   'Acontecimentos Estranhos',
 ];
 
-// Mock do usuário logado (em produção viria do contexto/storage)
-const USUARIO_MOCK = {
-  id: '123',
-  codinome: 'sussurrocristal',
-  genero: 'F' as 'M' | 'F' | 'N',
-  avatar_url:
-    'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher-eco.png',
-};
-
 export default function EcoarScreen() {
   const router = useRouter();
-
-  const [thread1, setThread1] = useState('');
-  const [thread2, setThread2] = useState('');
-  const [thread3, setThread3] = useState('');
-  const [tagsSelecionadas, setTagsSelecionadas] = useState<string[]>([]);
-  const [isPublishing, setIsPublishing] = useState(false);
-
+  // Hook de fluxo completo do eco
+  const ecoForm = useEcoForm();
   // Estados para controlar visibilidade dos campos opcionais
-  const [showThread2, setShowThread2] = useState(false);
-  const [showThread3, setShowThread3] = useState(false);
+  const [showThread2, setShowThread2] = React.useState(false);
+  const [showThread3, setShowThread3] = React.useState(false);
 
   // Ícones por gênero
   const getGeneroIcon = (genero: 'M' | 'F' | 'N') => {
@@ -79,76 +67,32 @@ export default function EcoarScreen() {
   };
 
   const toggleTag = (tag: string) => {
-    setTagsSelecionadas((prev) => {
+    ecoForm.setTags((prev) => {
       if (prev.includes(tag)) {
         return prev.filter((t) => t !== tag);
       } else {
-        // Limita a 3 tags
-        if (prev.length >= 3) {
-          return prev;
-        }
+        if (prev.length >= 3) return prev;
         return [...prev, tag];
       }
     });
   };
 
   const handleAddThread = () => {
-    if (!showThread2) {
-      setShowThread2(true);
-    } else if (!showThread3) {
-      setShowThread3(true);
-    }
+    if (!showThread2) setShowThread2(true);
+    else if (!showThread3) setShowThread3(true);
   };
 
   const handleRemoveThread2 = () => {
-    setThread2('');
+    ecoForm.setThread2('');
     setShowThread2(false);
   };
 
   const handleRemoveThread3 = () => {
-    setThread3('');
+    ecoForm.setThread3('');
     setShowThread3(false);
   };
 
   const canAddMoreThreads = !showThread2 || !showThread3;
-
-  const handlePublicar = async () => {
-    if (!thread1.trim()) {
-      Alert.alert('Ops!', 'A primeira thread é obrigatória para ecoar.');
-      return;
-    }
-
-    if (tagsSelecionadas.length === 0) {
-      Alert.alert('Ops!', 'Selecione pelo menos uma tag para seu eco.');
-      return;
-    }
-
-    setIsPublishing(true);
-
-    try {
-      // Aqui seria a chamada para a API
-      // const response = await api.post('/eco', {
-      //   thread_1: thread1,
-      //   thread_2: thread2 || null,
-      //   thread_3: thread3 || null,
-      //   tags: tagsSelecionadas
-      // });
-
-      // Simula delay da API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      Alert.alert('Eco enviado!', 'Seu eco foi compartilhado anonimamente.', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível enviar seu eco. Tente novamente.');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -166,20 +110,24 @@ export default function EcoarScreen() {
         </TouchableOpacity>
 
         <View style={styles.profileSection}>
-          <Image
-            source={{ uri: USUARIO_MOCK.avatar_url }}
-            style={styles.avatar}
-          />
-          <View style={styles.profileInfo}>
-            <View style={styles.codinomeRow}>
-              <FontAwesome5
-                name={getGeneroIcon(USUARIO_MOCK.genero)}
-                size={14}
-                color={getGeneroColor(USUARIO_MOCK.genero)}
+          {ecoForm.user && (
+            <>
+              <Image
+                source={{ uri: ecoForm.user.avatar_url }}
+                style={styles.avatar}
               />
-              <Text style={styles.codinome}>{USUARIO_MOCK.codinome}</Text>
-            </View>
-          </View>
+              <View style={styles.profileInfo}>
+                <View style={styles.codinomeRow}>
+                  <FontAwesome5
+                    name={getGeneroIcon(ecoForm.user.genero)}
+                    size={14}
+                    color={getGeneroColor(ecoForm.user.genero)}
+                  />
+                  <Text style={styles.codinome}>{ecoForm.user.codinome}</Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
       </View>
 
@@ -196,7 +144,7 @@ export default function EcoarScreen() {
                 key={tag}
                 style={[
                   styles.tagChip,
-                  tagsSelecionadas.includes(tag) && styles.tagChipSelected,
+                  ecoForm.tags.includes(tag) && styles.tagChipSelected,
                 ]}
                 onPress={() => toggleTag(tag)}
                 activeOpacity={0.7}
@@ -204,12 +152,12 @@ export default function EcoarScreen() {
                 <FontAwesome5
                   name='tag'
                   size={10}
-                  color={tagsSelecionadas.includes(tag) ? '#FFF' : '#666'}
+                  color={ecoForm.tags.includes(tag) ? '#FFF' : '#666'}
                 />
                 <Text
                   style={[
                     styles.tagText,
-                    tagsSelecionadas.includes(tag) && styles.tagTextSelected,
+                    ecoForm.tags.includes(tag) && styles.tagTextSelected,
                   ]}
                 >
                   {tag}
@@ -227,8 +175,8 @@ export default function EcoarScreen() {
           <ThreadInput
             label='primeira thread'
             placeholder='conte sua história...'
-            value={thread1}
-            onChangeText={setThread1}
+            value={ecoForm.thread1}
+            onChangeText={ecoForm.setThread1}
             isRequired={true}
           />
 
@@ -237,8 +185,8 @@ export default function EcoarScreen() {
             <ThreadInput
               label='segunda thread'
               placeholder='continue se quiser...'
-              value={thread2}
-              onChangeText={setThread2}
+              value={ecoForm.thread2}
+              onChangeText={ecoForm.setThread2}
               onRemove={handleRemoveThread2}
             />
           )}
@@ -248,8 +196,8 @@ export default function EcoarScreen() {
             <ThreadInput
               label='terceira thread'
               placeholder='finalize se necessário...'
-              value={thread3}
-              onChangeText={setThread3}
+              value={ecoForm.thread3}
+              onChangeText={ecoForm.setThread3}
               onRemove={handleRemoveThread3}
             />
           )}
@@ -279,24 +227,41 @@ export default function EcoarScreen() {
         <TouchableOpacity
           style={[
             styles.publishButton,
-            (!thread1.trim() ||
-              tagsSelecionadas.length === 0 ||
-              isPublishing) &&
+            (ecoForm.loading ||
+              !ecoForm.thread1.trim() ||
+              ecoForm.tags.length === 0) &&
               styles.publishButtonDisabled,
           ]}
-          onPress={handlePublicar}
+          onPress={ecoForm.handleSubmit}
           disabled={
-            !thread1.trim() || tagsSelecionadas.length === 0 || isPublishing
+            ecoForm.loading ||
+            !ecoForm.thread1.trim() ||
+            ecoForm.tags.length === 0
           }
           activeOpacity={0.8}
         >
-          {isPublishing ? (
-            <Text style={styles.publishButtonText}>ecoando...</Text>
-          ) : (
-            <Text style={styles.publishButtonText}>ecoar</Text>
-          )}
+          <Text style={styles.publishButtonText}>
+            {ecoForm.loading ? 'publicando...' : 'publicar'}
+          </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal de erro UX global */}
+      <ErrorModal
+        visible={ecoForm.showErrorModal}
+        message={ecoForm.errorMessage || ''}
+        onClose={() => ecoForm.setShowErrorModal(false)}
+      />
+
+      {/* Modal de sucesso UX global */}
+      <SuccessModal
+        visible={ecoForm.showSuccessModal}
+        message={'Seu eco foi publicado!'}
+        onClose={() => {
+          ecoForm.setShowSuccessModal(false);
+          router.push('/ecos');
+        }}
+      />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,16 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ErrorModal from './components/ErrorModal';
+import useLoginForm from './hooks/useLoginForm';
 
 export default function LoginScreen() {
+  // Hook de fluxo completo do login
+  const loginForm = useLoginForm();
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-
-  function handleLogin() {
-    // aqui entra a lógica de autenticação depois
-    console.log('Login com:', email, senha);
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,8 +26,8 @@ export default function LoginScreen() {
           style={styles.input}
           placeholder='email'
           placeholderTextColor='#666'
-          value={email}
-          onChangeText={setEmail}
+          value={loginForm.email}
+          onChangeText={loginForm.setEmail}
           keyboardType='email-address'
           autoCapitalize='none'
           autoCorrect={false}
@@ -40,28 +37,35 @@ export default function LoginScreen() {
           style={styles.input}
           placeholder='senha'
           placeholderTextColor='#666'
-          value={senha}
-          onChangeText={setSenha}
+          value={loginForm.senha}
+          onChangeText={loginForm.setSenha}
           secureTextEntry
           autoCapitalize='none'
           textContentType='password'
         />
         <TouchableOpacity
           style={styles.button}
-          onPress={handleLogin}
+          onPress={loginForm.handleSubmit}
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>entrar</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={() => router.push('/esqueci-senha')}>
+      <TouchableOpacity onPress={() => router.push('./esqueci-senha')}>
         <Text style={styles.link}>esqueceu a senha?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/register')}>
+      <TouchableOpacity onPress={() => router.push('./register')}>
         <Text style={styles.link}>não tem conta? cadastre-se</Text>
       </TouchableOpacity>
+
+      {/* Modal de erro UX global */}
+      <ErrorModal
+        visible={loginForm.showErrorModal}
+        message={loginForm.errorMessage || ''}
+        onClose={() => loginForm.setShowErrorModal(false)}
+      />
     </SafeAreaView>
   );
 }

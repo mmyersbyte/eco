@@ -1,7 +1,5 @@
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import {
-  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -12,109 +10,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ErrorModal from './components/ErrorModal';
 import TermsModal from './components/TermsModal';
-import { useCodinomeGenerator } from './hooks/useCodinomeGenerator';
+import useRegisterForm from './hooks/useRegisterForm';
 
 const WIDTH = Dimensions.get('window').width;
 
-const avatars = [
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/boneca-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/cachorro-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/cadeira-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/gatinho-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/gato-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/homem-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/homem2-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher2-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher3-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/passaro-eco.png',
-  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/rato-eco.png',
-];
-
 export default function CadastroScreen() {
-  const router = useRouter();
-
-  // Hook personalizado para geração de codinomes
-  const {
-    codinomeAtual,
-    isGenerating,
-    error: codinomeError,
-    gerarNovoCodinome,
-  } = useCodinomeGenerator();
-
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmSenha, setConfirmSenha] = useState('');
-  const [genero, setGenero] = useState<'M' | 'F' | 'N' | null>(null);
-  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
-  const [aceitouTermos, setAceitouTermos] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
-
-  const flatListRef = useRef<FlatList<string>>(null);
-
-  // Gera novo codinome quando o gênero muda
-  useEffect(() => {
-    if (genero) {
-      gerarNovoCodinome(genero);
-    }
-    setSelectedAvatarIndex(0); // reset avatar ao mudar gênero
-    // Scroll para início ao mudar gênero
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [genero]);
-
-  function handleCriarConta() {
-    if (!email || !senha || !confirmSenha || !genero) {
-      Alert.alert('Preencha todos os campos e selecione o gênero');
-      return;
-    }
-    if (senha !== confirmSenha) {
-      Alert.alert('As senhas não coincidem');
-      return;
-    }
-    if (!aceitouTermos) {
-      Alert.alert('Aceite nossos termos para continuar');
-      return;
-    }
-    if (!codinomeAtual) {
-      Alert.alert('Aguarde a geração do codinome');
-      return;
-    }
-    // lógica real de cadastro aqui
-    Alert.alert('Conta criada com sucesso!', `Seu codinome é ${codinomeAtual}`);
-    router.push('/');
-  }
-
-  function onAvatarScroll(event: any) {
-    const index = Math.round(event.nativeEvent.contentOffset.x / (WIDTH / 3));
-    setSelectedAvatarIndex(index);
-  }
-
-  function selectAvatar(index: number) {
-    setSelectedAvatarIndex(index);
-    flatListRef.current?.scrollToIndex({ index, animated: true });
-  }
-
-  function handleOpenTerms() {
-    setShowTermsModal(true);
-  }
-
-  function handleCloseTerms() {
-    setShowTermsModal(false);
-  }
-
-  function toggleTermsAcceptance() {
-    setAceitouTermos(!aceitouTermos);
-  }
-
-  function handleGerarNovoCodinome() {
-    if (genero) {
-      gerarNovoCodinome(genero);
-    }
-  }
+  // Hook de fluxo completo do cadastro
+  const cadastro = useRegisterForm();
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Exibe loading global do cadastro */}
+      {cadastro.loading && (
+        <Text style={{ color: '#4A90E2', textAlign: 'center' }}>
+          carregando...
+        </Text>
+      )}
       <Text style={styles.logo}>eco.</Text>
       <Text style={styles.subtitle}>crie sua conta anônima</Text>
 
@@ -123,8 +36,8 @@ export default function CadastroScreen() {
           style={styles.input}
           placeholder='email'
           placeholderTextColor='#666'
-          value={email}
-          onChangeText={setEmail}
+          value={cadastro.email}
+          onChangeText={cadastro.setEmail}
           keyboardType='email-address'
           autoCapitalize='none'
           autoCorrect={false}
@@ -134,8 +47,8 @@ export default function CadastroScreen() {
           style={styles.input}
           placeholder='senha'
           placeholderTextColor='#666'
-          value={senha}
-          onChangeText={setSenha}
+          value={cadastro.senha}
+          onChangeText={cadastro.setSenha}
           secureTextEntry
           autoCapitalize='none'
           textContentType='password'
@@ -144,8 +57,8 @@ export default function CadastroScreen() {
           style={styles.input}
           placeholder='confirmar senha'
           placeholderTextColor='#666'
-          value={confirmSenha}
-          onChangeText={setConfirmSenha}
+          value={cadastro.confirmSenha}
+          onChangeText={cadastro.setConfirmSenha}
           secureTextEntry
           autoCapitalize='none'
           textContentType='password'
@@ -158,14 +71,14 @@ export default function CadastroScreen() {
               key={g}
               style={[
                 styles.generoBtn,
-                genero === g && styles.generoBtnSelected,
+                cadastro.genero === g && styles.generoBtnSelected,
               ]}
-              onPress={() => setGenero(g as 'M' | 'F' | 'N')}
+              onPress={() => cadastro.setGenero(g as 'M' | 'F' | 'N')}
             >
               <Text
                 style={[
                   styles.generoBtnText,
-                  genero === g && styles.generoBtnTextSelected,
+                  cadastro.genero === g && styles.generoBtnTextSelected,
                 ]}
               >
                 {g === 'M'
@@ -178,16 +91,16 @@ export default function CadastroScreen() {
           ))}
         </View>
 
-        {genero && (
+        {cadastro.genero && (
           <>
             <Text style={[styles.label, { marginTop: 20 }]}>seu avatar</Text>
             <FlatList
-              ref={flatListRef}
+              ref={cadastro.flatListRef}
               horizontal
               showsHorizontalScrollIndicator={false}
-              data={avatars}
+              data={cadastro.avatars}
               keyExtractor={(item) => item}
-              onScroll={onAvatarScroll}
+              onScroll={cadastro.onAvatarScroll}
               scrollEventThrottle={16}
               getItemLayout={(_, index) => ({
                 length: WIDTH / 3,
@@ -197,17 +110,20 @@ export default function CadastroScreen() {
               renderItem={({ item, index }) => (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => selectAvatar(index)}
+                  onPress={() => cadastro.selectAvatar(index)}
                   style={[
                     styles.avatarWrapper,
-                    index === selectedAvatarIndex && styles.avatarSelected,
+                    index === cadastro.selectedAvatarIndex &&
+                      styles.avatarSelected,
                   ]}
                 >
                   <Image
                     source={{ uri: item }}
                     style={[
                       styles.avatarPreview,
-                      index !== selectedAvatarIndex && { opacity: 0.6 },
+                      index !== cadastro.selectedAvatarIndex && {
+                        opacity: 0.6,
+                      },
                     ]}
                     resizeMode='cover'
                   />
@@ -215,59 +131,57 @@ export default function CadastroScreen() {
               )}
             />
             <Text style={styles.avatarCounter}>
-              {selectedAvatarIndex + 1} / {avatars.length}
+              {cadastro.selectedAvatarIndex + 1} / {cadastro.avatars.length}
             </Text>
 
             <Text style={styles.label}>seu codinome</Text>
             <View style={styles.nicknameContainer}>
               <Text style={styles.nicknameText}>
-                {isGenerating ? 'gerando...' : codinomeAtual || 'carregando...'}
+                {cadastro.isGenerating
+                  ? 'gerando...'
+                  : cadastro.codinomeAtual || 'carregando...'}
               </Text>
               <TouchableOpacity
-                onPress={handleGerarNovoCodinome}
+                onPress={cadastro.handleGerarNovoCodinome}
                 style={[
                   styles.gerarOutroBtn,
-                  isGenerating && styles.gerarOutroBtnDisabled,
+                  cadastro.isGenerating && styles.gerarOutroBtnDisabled,
                 ]}
-                disabled={isGenerating}
+                disabled={cadastro.isGenerating}
               >
                 <Text
                   style={[
                     styles.gerarOutroText,
-                    isGenerating && styles.gerarOutroTextDisabled,
+                    cadastro.isGenerating && styles.gerarOutroTextDisabled,
                   ]}
                 >
-                  {isGenerating ? 'gerando...' : 'gerar outro'}
+                  {cadastro.isGenerating ? 'gerando...' : 'gerar outro'}
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {codinomeError && (
-              <Text style={styles.errorText}>{codinomeError}</Text>
-            )}
           </>
         )}
 
         <View style={styles.termsContainer}>
           <TouchableOpacity
             style={styles.checkboxContainer}
-            onPress={toggleTermsAcceptance}
+            onPress={cadastro.toggleTermsAcceptance}
             activeOpacity={0.7}
           >
             <View
               style={[
                 styles.checkbox,
-                aceitouTermos && styles.checkboxSelected,
+                cadastro.aceitouTermos && styles.checkboxSelected,
               ]}
             >
-              {aceitouTermos && <View style={styles.checkboxInner} />}
+              {cadastro.aceitouTermos && <View style={styles.checkboxInner} />}
             </View>
 
             <Text style={styles.termsText}>
               aceito as{' '}
               <Text
                 style={styles.termsLink}
-                onPress={handleOpenTerms}
+                onPress={cadastro.handleOpenTerms}
               >
                 normas e condições
               </Text>{' '}
@@ -278,7 +192,7 @@ export default function CadastroScreen() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={handleCriarConta}
+          onPress={cadastro.handleSubmit}
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>criar conta</Text>
@@ -286,8 +200,15 @@ export default function CadastroScreen() {
       </View>
 
       <TermsModal
-        visible={showTermsModal}
-        onClose={handleCloseTerms}
+        visible={cadastro.showTermsModal}
+        onClose={cadastro.handleCloseTerms}
+      />
+
+      {/* Modal de erro UX global */}
+      <ErrorModal
+        visible={cadastro.showErrorModal}
+        message={cadastro.errorMessage || ''}
+        onClose={() => cadastro.setShowErrorModal(false)}
       />
     </SafeAreaView>
   );
@@ -421,13 +342,6 @@ const styles = StyleSheet.create({
   },
   gerarOutroTextDisabled: {
     color: '#555',
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 16,
-    opacity: 0.8,
   },
   button: {
     backgroundColor: '#4A90E2',
