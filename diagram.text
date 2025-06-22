@@ -1,0 +1,36 @@
+┌──────────────────────────────┐
+│ register │
+│ ──────────────────────────── │
+│ id PK (uuid) │
+│ email unique │
+│ senha │
+│ codinome unique │
+│ genero │
+│ avatar_url │
+│ created_at │
+│ updated_at │
+└─────────────┬────────────────┘
+│
+(1) │ (N)
+│
+┌─────────────▼────────────────┐
+│ ecos │
+│ ──────────────────────────── │
+│ id PK (uuid) │
+│ user_id FK -> register │
+│ titulo │
+│ historia │
+│ created_at │
+│ updated_at │
+└─────────────┬────────────────┘
+│
+(1) │ (N)
+│
+┌─────────────▼────────────────┐
+│ sussurros │
+│ ──────────────────────────── │
+│ id PK (uuid) │
+│ eco_id FK -> ecos │
+│ conteudo │
+│ created_at │
+└──────────────────────────────┘

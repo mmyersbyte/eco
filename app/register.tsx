@@ -12,52 +12,56 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import TermsModal from './components/TermsModal';
+import { useCodinomeGenerator } from './hooks/useCodinomeGenerator';
 
 const WIDTH = Dimensions.get('window').width;
 
-const avatars = {
-  M: Array.from({ length: 20 }).map(
-    (_, i) => `https://placehold.co/100x100/png?text=M${i + 1}`
-  ),
-  F: Array.from({ length: 20 }).map(
-    (_, i) => `https://placehold.co/100x100/png?text=F${i + 1}`
-  ),
-  N: Array.from({ length: 20 }).map(
-    (_, i) => `https://placehold.co/100x100/png?text=N${i + 1}`
-  ),
-};
-
-const nicknames = {
-  M: ['EcoVento', 'SussurroAzul', 'VozLivre'],
-  F: ['EcoLuz', 'SussurroRosa', 'VozSerena'],
-  N: ['EcoNeutro', 'SussurroBranco', 'VozCalma'],
-};
+const avatars = [
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/boneca-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/cachorro-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/cadeira-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/gatinho-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/gato-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/homem-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/homem2-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher2-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/mulher3-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/passaro-eco.png',
+  'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/rato-eco.png',
+];
 
 export default function CadastroScreen() {
   const router = useRouter();
+
+  // Hook personalizado para geração de codinomes
+  const {
+    codinomeAtual,
+    isGenerating,
+    error: codinomeError,
+    gerarNovoCodinome,
+  } = useCodinomeGenerator();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmSenha, setConfirmSenha] = useState('');
   const [genero, setGenero] = useState<'M' | 'F' | 'N' | null>(null);
-  const [nickname, setNickname] = useState('');
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
+  const [aceitouTermos, setAceitouTermos] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const flatListRef = useRef<FlatList<string>>(null);
 
+  // Gera novo codinome quando o gênero muda
   useEffect(() => {
-    gerarNickname();
+    if (genero) {
+      gerarNovoCodinome(genero);
+    }
     setSelectedAvatarIndex(0); // reset avatar ao mudar gênero
     // Scroll para início ao mudar gênero
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   }, [genero]);
-
-  function gerarNickname() {
-    if (!genero) return;
-    const options = nicknames[genero];
-    const randomIndex = Math.floor(Math.random() * options.length);
-    setNickname(options[randomIndex]);
-  }
 
   function handleCriarConta() {
     if (!email || !senha || !confirmSenha || !genero) {
@@ -68,9 +72,17 @@ export default function CadastroScreen() {
       Alert.alert('As senhas não coincidem');
       return;
     }
+    if (!aceitouTermos) {
+      Alert.alert('Aceite nossos termos para continuar');
+      return;
+    }
+    if (!codinomeAtual) {
+      Alert.alert('Aguarde a geração do codinome');
+      return;
+    }
     // lógica real de cadastro aqui
-    Alert.alert('Conta criada com sucesso!', `Seu codinome é ${nickname}`);
-    router.push('/login');
+    Alert.alert('Conta criada com sucesso!', `Seu codinome é ${codinomeAtual}`);
+    router.push('/');
   }
 
   function onAvatarScroll(event: any) {
@@ -81,6 +93,24 @@ export default function CadastroScreen() {
   function selectAvatar(index: number) {
     setSelectedAvatarIndex(index);
     flatListRef.current?.scrollToIndex({ index, animated: true });
+  }
+
+  function handleOpenTerms() {
+    setShowTermsModal(true);
+  }
+
+  function handleCloseTerms() {
+    setShowTermsModal(false);
+  }
+
+  function toggleTermsAcceptance() {
+    setAceitouTermos(!aceitouTermos);
+  }
+
+  function handleGerarNovoCodinome() {
+    if (genero) {
+      gerarNovoCodinome(genero);
+    }
   }
 
   return (
@@ -155,7 +185,7 @@ export default function CadastroScreen() {
               ref={flatListRef}
               horizontal
               showsHorizontalScrollIndicator={false}
-              data={avatars[genero]}
+              data={avatars}
               keyExtractor={(item) => item}
               onScroll={onAvatarScroll}
               scrollEventThrottle={16}
@@ -185,21 +215,66 @@ export default function CadastroScreen() {
               )}
             />
             <Text style={styles.avatarCounter}>
-              {selectedAvatarIndex + 1} / {avatars[genero].length}
+              {selectedAvatarIndex + 1} / {avatars.length}
             </Text>
 
             <Text style={styles.label}>seu codinome</Text>
             <View style={styles.nicknameContainer}>
-              <Text style={styles.nicknameText}>{nickname}</Text>
+              <Text style={styles.nicknameText}>
+                {isGenerating ? 'gerando...' : codinomeAtual || 'carregando...'}
+              </Text>
               <TouchableOpacity
-                onPress={gerarNickname}
-                style={styles.gerarOutroBtn}
+                onPress={handleGerarNovoCodinome}
+                style={[
+                  styles.gerarOutroBtn,
+                  isGenerating && styles.gerarOutroBtnDisabled,
+                ]}
+                disabled={isGenerating}
               >
-                <Text style={styles.gerarOutroText}>gerar outro</Text>
+                <Text
+                  style={[
+                    styles.gerarOutroText,
+                    isGenerating && styles.gerarOutroTextDisabled,
+                  ]}
+                >
+                  {isGenerating ? 'gerando...' : 'gerar outro'}
+                </Text>
               </TouchableOpacity>
             </View>
+
+            {codinomeError && (
+              <Text style={styles.errorText}>{codinomeError}</Text>
+            )}
           </>
         )}
+
+        <View style={styles.termsContainer}>
+          <TouchableOpacity
+            style={styles.checkboxContainer}
+            onPress={toggleTermsAcceptance}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                aceitouTermos && styles.checkboxSelected,
+              ]}
+            >
+              {aceitouTermos && <View style={styles.checkboxInner} />}
+            </View>
+
+            <Text style={styles.termsText}>
+              aceito as{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={handleOpenTerms}
+              >
+                normas e condições
+              </Text>{' '}
+              do aplicativo
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
@@ -209,6 +284,11 @@ export default function CadastroScreen() {
           <Text style={styles.buttonText}>criar conta</Text>
         </TouchableOpacity>
       </View>
+
+      <TermsModal
+        visible={showTermsModal}
+        onClose={handleCloseTerms}
+      />
     </SafeAreaView>
   );
 }
@@ -322,15 +402,32 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'lowercase',
+    flex: 1,
+    textAlign: 'center',
   },
   gerarOutroBtn: {
     marginLeft: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  gerarOutroBtnDisabled: {
+    opacity: 0.5,
   },
   gerarOutroText: {
     color: '#AAA',
     fontWeight: '600',
     fontSize: 14,
     textTransform: 'lowercase',
+  },
+  gerarOutroTextDisabled: {
+    color: '#555',
+  },
+  errorText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 16,
+    opacity: 0.8,
   },
   button: {
     backgroundColor: '#4A90E2',
@@ -344,5 +441,48 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 1,
     textTransform: 'lowercase',
+  },
+  termsContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+    marginTop: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderWidth: 1.5,
+    borderColor: '#444',
+    borderRadius: 9,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  checkboxSelected: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  checkboxInner: {
+    width: 8,
+    height: 8,
+    backgroundColor: '#FFF',
+    borderRadius: 4,
+  },
+  termsText: {
+    color: '#AAA',
+    fontSize: 13,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+    textTransform: 'lowercase',
+  },
+  termsLink: {
+    color: '#4A90E2',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

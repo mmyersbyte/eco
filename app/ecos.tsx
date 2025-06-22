@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Dimensions,
@@ -12,7 +13,6 @@ import {
 } from 'react-native';
 import SussurrosModal from './components/SussurrosModal';
 import { FeedItem, useFeed } from './hooks/useFeed';
-
 const WIDTH = Dimensions.get('window').width;
 
 export default function Ecos({ navigation }: any) {
@@ -109,7 +109,11 @@ export default function Ecos({ navigation }: any) {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.footerBtn}
-          onPress={() => alert('Voltar para as tags')}
+          onPress={() =>
+            router.push({
+              pathname: '/',
+            })
+          }
         >
           <Text style={styles.footerBtnText}>tags</Text>
         </TouchableOpacity>
