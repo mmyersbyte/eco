@@ -36,10 +36,33 @@ const ecoUpdateSchema = z.object({
 });
 
 class EcoController {
-  // Listar todos os ecos
+  // Listar todos os ecos com dados do usuário autor
   async index(request: Request, response: Response, next: NextFunction) {
     try {
-      const ecos: Eco[] = await knexInstance<Eco>('eco').select('*');
+      // JOIN entre eco e register para trazer avatar, codinome e genero do autor
+      const ecos = await knexInstance('eco')
+        .join('register', 'eco.user_id', 'register.id')
+        .select(
+          'eco.id',
+          'eco.thread_1',
+          'eco.thread_2',
+          'eco.thread_3',
+          'eco.tags',
+          'eco.created_at',
+          'eco.updated_at',
+          'eco.user_id',
+          // Dados do autor
+          'register.codinome',
+          'register.avatar_url',
+          'register.genero'
+        );
+
+      // // Se quiser incluir sussurros, pode fazer um map e buscar por eco_id
+      // for (const eco of ecos) {
+      //   eco.sussurros = await knexInstance('sussurro').where({ eco_id: eco.id });
+      // }
+
+      // Retorna todos os ecos já com dados do autor
       return response.json({ ecos });
     } catch (error) {
       next(error);
