@@ -83,6 +83,10 @@ export default function EcoarScreen() {
       if (prev.includes(tag)) {
         return prev.filter((t) => t !== tag);
       } else {
+        // Limita a 3 tags
+        if (prev.length >= 3) {
+          return prev;
+        }
         return [...prev, tag];
       }
     });

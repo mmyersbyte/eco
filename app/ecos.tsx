@@ -1,3 +1,4 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -11,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import EcoModal from './components/EcoModal';
 import SussurrosModal from './components/SussurrosModal';
 import { FeedItem, useFeed } from './hooks/useFeed';
 const WIDTH = Dimensions.get('window').width;
@@ -18,7 +20,8 @@ const WIDTH = Dimensions.get('window').width;
 export default function Ecos({ navigation }: any) {
   const { feed, adicionarSussurro } = useFeed();
   const [search, setSearch] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [ecoModalVisible, setEcoModalVisible] = useState(false);
+  const [sussurrosModalVisible, setSussurrosModalVisible] = useState(false);
   const [ecoSelecionado, setEcoSelecionado] = useState<FeedItem | null>(null);
 
   const filteredFeed = feed.filter(
@@ -27,6 +30,43 @@ export default function Ecos({ navigation }: any) {
       item.titulo.toLowerCase().includes(search.toLowerCase()) ||
       item.historia.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Função para obter ícone por gênero
+  const getGeneroIcon = (genero: 'M' | 'F' | 'N') => {
+    switch (genero) {
+      case 'M':
+        return 'male';
+      case 'F':
+        return 'female';
+      case 'N':
+        return 'transgender-alt';
+      default:
+        return 'question';
+    }
+  };
+
+  const getGeneroColor = (genero: 'M' | 'F' | 'N') => {
+    switch (genero) {
+      case 'M':
+        return '#4A90E2';
+      case 'F':
+        return '#E24A90';
+      case 'N':
+        return '#9A4AE2';
+      default:
+        return '#AAA';
+    }
+  };
+
+  const handleCardPress = (item: FeedItem) => {
+    setEcoSelecionado(item);
+    setEcoModalVisible(true);
+  };
+
+  const handleSussurrarPress = () => {
+    setEcoModalVisible(false);
+    setSussurrosModalVisible(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,16 +83,30 @@ export default function Ecos({ navigation }: any) {
       <FlatList
         data={filteredFeed}
         keyExtractor={(item) => item.id}
-        pagingEnabled
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.flatlistContainer}
+        contentContainerStyle={[
+          styles.flatlistContainer,
+          { paddingVertical: 16 },
+        ]}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => handleCardPress(item)}
+            activeOpacity={0.8}
+          >
             <Image
-              source={require('../assets/avatar_eco.png')}
+              source={{ uri: item.avatar_url }}
               style={styles.avatar}
             />
-            <Text style={styles.codinome}>{item.codinome}</Text>
+            <View style={styles.codinomeContainer}>
+              <Text style={styles.codinome}>{item.codinome}</Text>
+              <FontAwesome5
+                name={getGeneroIcon(item.genero)}
+                size={10}
+                color={getGeneroColor(item.genero)}
+                style={styles.generoIcon}
+              />
+            </View>
             <Text style={styles.titulo}>{item.titulo}</Text>
             <Text style={styles.historia}>
               {item.historia.length > 148
@@ -61,9 +115,10 @@ export default function Ecos({ navigation }: any) {
             </Text>
             <TouchableOpacity
               style={styles.sussurrosBtn}
-              onPress={() => {
+              onPress={(e) => {
+                e.stopPropagation();
                 setEcoSelecionado(item);
-                setModalVisible(true);
+                setSussurrosModalVisible(true);
               }}
               disabled={item.sussurros.length >= 10}
               activeOpacity={item.sussurros.length >= 10 ? 1 : 0.7}
@@ -79,15 +134,25 @@ export default function Ecos({ navigation }: any) {
                   : `${item.sussurros.length} sussurros.`}
               </Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       />
+
+      {/* Modal do eco completo */}
+      {ecoSelecionado && (
+        <EcoModal
+          visible={ecoModalVisible}
+          onClose={() => setEcoModalVisible(false)}
+          eco={ecoSelecionado}
+          onSussurrar={handleSussurrarPress}
+        />
+      )}
 
       {/* Modal de sussurros */}
       {ecoSelecionado && (
         <SussurrosModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
+          visible={sussurrosModalVisible}
+          onClose={() => setSussurrosModalVisible(false)}
           sussurros={ecoSelecionado.sussurros}
           onSussurrar={(novo) => {
             adicionarSussurro(ecoSelecionado.id, novo);
@@ -153,7 +218,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexGrow: 1,
-    paddingVertical: 40,
   },
   card: {
     width: CARD_WIDTH,
@@ -173,6 +237,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     opacity: 0.55,
   },
+  codinomeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 3,
+  },
   codinome: {
     color: '#4A90E2',
     fontSize: 13,
@@ -180,7 +249,10 @@ const styles = StyleSheet.create({
     textTransform: 'lowercase',
     letterSpacing: 1,
     opacity: 0.6,
-    marginBottom: 3,
+  },
+  generoIcon: {
+    marginLeft: 6,
+    opacity: 0.4,
   },
   titulo: {
     color: '#FFF',
