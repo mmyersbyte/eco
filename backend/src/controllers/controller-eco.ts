@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { knexInstance } from '../database/knex.ts';
 import { AppError } from '../utils/AppError.ts';
 
-// Schema Zod para criação de eco
+// Schema Zod para criação de eco (recebe array de tag_ids, não mais nomes)
 const ecoSchema = z.object({
   user_id: z.string().uuid({ message: 'ID de usuário inválido.' }),
   thread_1: z
@@ -22,54 +22,47 @@ const ecoSchema = z.object({
     .max(144, { message: 'No máximo 144 caracteres por thread.' })
     .optional()
     .or(z.literal('')),
-  tags: z
-    .array(z.string().max(40, { message: 'Tag pode ter até 40 caracteres.' }))
-    .min(1, { message: 'Pelo menos uma tag é obrigatória.' }),
+  tag_ids: z
+    .array(z.string().uuid({ message: 'ID de tag inválido.' }))
+    .min(1, { message: 'Pelo menos uma tag é obrigatória.' })
+    .max(3, { message: 'No máximo 3 tags por eco.' }),
 });
 
-// Para update: **NÃO permite editar tags**
+// Para update: só permite editar threads (NÃO permite editar tags)
 const ecoUpdateSchema = z.object({
   thread_1: z.string().max(144).optional(),
   thread_2: z.string().max(144).optional(),
   thread_3: z.string().max(144).optional(),
-  // tags removido! Não pode ser editada
 });
 
 class EcoController {
-  // Listar todos os ecos com dados do usuário autor
+  /**
+   * Lista todos os ecos, trazendo também as tags associadas via join.
+   */
   async index(request: Request, response: Response, next: NextFunction) {
     try {
-      // JOIN entre eco e register para trazer avatar, codinome e genero do autor
-      const ecos = await knexInstance('eco')
-        .join('register', 'eco.user_id', 'register.id')
-        .select(
-          'eco.id',
-          'eco.thread_1',
-          'eco.thread_2',
-          'eco.thread_3',
-          'eco.tags',
-          'eco.created_at',
-          'eco.updated_at',
-          'eco.user_id',
-          // Dados do autor
-          'register.codinome',
-          'register.avatar_url',
-          'register.genero'
-        );
-
-      // // Se quiser incluir sussurros, pode fazer um map e buscar por eco_id
-      // for (const eco of ecos) {
-      //   eco.sussurros = await knexInstance('sussurro').where({ eco_id: eco.id });
-      // }
-
-      // Retorna todos os ecos já com dados do autor
-      return response.json({ ecos });
+      // Busca todos os ecos
+      const ecos = await knexInstance<Eco>('eco').select('*');
+      // Para cada eco, busca as tags associadas via join (eco_tags + tags)
+      const ecosWithTags = await Promise.all(
+        ecos.map(async (eco) => {
+          const tags = await knexInstance('eco_tags')
+            .join('tags', 'eco_tags.tag_id', 'tags.id')
+            .where('eco_tags.eco_id', eco.id)
+            .select('tags.id', 'tags.nome');
+          return { ...eco, tags };
+        })
+      );
+      return response.json({ ecos: ecosWithTags });
     } catch (error) {
       next(error);
     }
   }
 
-  // Criar um novo eco (post)
+  /**
+   * Cria um novo eco. Valida os tag_ids e associa no eco_tags.
+   * tags não são editáveis após a criação.
+   */
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       // Validação dos dados recebidos
@@ -80,7 +73,8 @@ class EcoController {
         throw new AppError(`Erro de validação: ${errorMessage}`, 400);
       }
 
-      const { user_id, thread_1, thread_2, thread_3, tags } = validation.data;
+      const { user_id, thread_1, thread_2, thread_3, tag_ids } =
+        validation.data;
 
       // Verifica se o usuário existe
       const userExists = await knexInstance('register')
@@ -90,39 +84,62 @@ class EcoController {
         throw new AppError('Usuário não encontrado.', 404);
       }
 
+      // Valida se as tags existem e se não há duplicadas
+      const uniqueTagIds = Array.from(new Set(tag_ids));
+      if (uniqueTagIds.length !== tag_ids.length) {
+        throw new AppError('Não repita tags no mesmo eco.', 400);
+      }
+      const foundTags = await knexInstance('tags')
+        .whereIn('id', uniqueTagIds)
+        .select('id');
+      if (foundTags.length !== uniqueTagIds.length) {
+        throw new AppError('Uma ou mais tags não existem.', 400);
+      }
+
       // Cria o eco
+      const ecoId = crypto.randomUUID();
       const [eco] = await knexInstance<Eco>('eco')
         .insert({
-          id: crypto.randomUUID(),
+          id: ecoId,
           user_id,
           thread_1,
           thread_2: thread_2 || null,
           thread_3: thread_3 || null,
-          tags,
         })
         .returning('*');
 
+      // Associa as tags na tabela eco_tags
+      const ecoTagsToInsert = uniqueTagIds.map((tag_id) => ({
+        eco_id: ecoId,
+        tag_id,
+      }));
+      await knexInstance('eco_tags').insert(ecoTagsToInsert);
+
+      // Busca as tags para retornar junto
+      const tags = await knexInstance('tags')
+        .whereIn('id', uniqueTagIds)
+        .select('id', 'nome');
+
       return response
         .status(201)
-        .json({ message: 'Eco criado com sucesso!', eco });
+        .json({ message: 'Eco criado com sucesso!', eco: { ...eco, tags } });
     } catch (error) {
       next(error);
     }
   }
 
-  // Atualizar um eco existente (apenas threads, **não pode editar tags**)
+  /**
+   * Atualiza threads de um eco (tags não podem ser editadas).
+   */
   async update(request: Request, response: Response, next: NextFunction) {
     try {
       const { id } = request.params;
-
-      // Validação dos dados recebidos (NÃO aceita tags!)
       const validation = ecoUpdateSchema.safeParse(request.body);
       if (!validation.success) {
         const errorMessage =
           validation.error.errors[0]?.message || 'Dados inválidos.';
         throw new AppError(`Erro de validação: ${errorMessage}`, 400);
       }
-
       const updateData = validation.data;
 
       // Verifica se o eco existe
@@ -131,29 +148,39 @@ class EcoController {
         throw new AppError('Eco não encontrado.', 404);
       }
 
-      // Atualiza o eco (threads)
+      // Atualiza o eco (apenas threads)
       const [eco] = await knexInstance<Eco>('eco')
         .where({ id })
         .update(updateData)
         .returning('*');
 
-      return response.json({ message: 'Eco atualizado com sucesso!', eco });
+      // Busca as tags para retornar junto
+      const tags = await knexInstance('eco_tags')
+        .join('tags', 'eco_tags.tag_id', 'tags.id')
+        .where('eco_tags.eco_id', eco.id)
+        .select('tags.id', 'tags.nome');
+
+      return response.json({
+        message: 'Eco atualizado com sucesso!',
+        eco: { ...eco, tags },
+      });
     } catch (error) {
       next(error);
     }
   }
 
-  // Deletar um eco
+  /**
+   * Deleta um eco e suas associações em eco_tags (cascata).
+   */
   async delete(request: Request, response: Response, next: NextFunction) {
     try {
       const { id } = request.params;
-
       // Verifica se o eco existe
       const ecoExists = await knexInstance<Eco>('eco').where({ id }).first();
       if (!ecoExists) {
         throw new AppError('Eco não encontrado.', 404);
       }
-
+      // Deleta o eco (eco_tags serão deletadas pelo CASCADE)
       await knexInstance<Eco>('eco').where({ id }).delete();
 
       return response.json({ message: 'Eco deletado com sucesso!' });
@@ -162,7 +189,9 @@ class EcoController {
     }
   }
 
-  // Mostrar um eco com todos os seus sussurros (comentários)
+  /**
+   * Mostra um eco individual, suas tags e seus sussurros (comentários).
+   */
   async show(request: Request, response: Response, next: NextFunction) {
     try {
       const { id } = request.params;
@@ -173,13 +202,19 @@ class EcoController {
         throw new AppError('Eco não encontrado.', 404);
       }
 
+      // Busca as tags
+      const tags = await knexInstance('eco_tags')
+        .join('tags', 'eco_tags.tag_id', 'tags.id')
+        .where('eco_tags.eco_id', eco.id)
+        .select('tags.id', 'tags.nome');
+
       // Busca todos os sussurros ligados a esse eco
       const sussurros = await knexInstance('sussurro')
         .where({ eco_id: id })
         .select('*');
 
       // Retorna tudo junto
-      return response.json({ ...eco, sussurros });
+      return response.json({ ...eco, tags, sussurros });
     } catch (error) {
       next(error);
     }

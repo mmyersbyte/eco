@@ -9,8 +9,6 @@ export async function up(knex: Knex): Promise<void> {
       .references('id')
       .inTable('register')
       .onDelete('CASCADE'); // FK para register
-    table.specificType('tags', 'text[]');
-
     table.string('thread_1', 144).notNullable(); // Thread 1 obrigatória
     table.string('thread_2', 144); // Thread 2 opcional
     table.string('thread_3', 144); // Thread 3 opcional
