@@ -1,4 +1,4 @@
-import { Eco } from '@/@types/eco.ts';
+import type { Eco } from '@/@types/eco.ts';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { z } from 'zod';
@@ -7,7 +7,6 @@ import { AppError } from '../utils/AppError.ts';
 
 // Schema Zod para criação de eco (recebe array de tag_ids, não mais nomes)
 const ecoSchema = z.object({
-  user_id: z.string().uuid({ message: 'ID de usuário inválido.' }),
   thread_1: z
     .string()
     .min(1, { message: 'Primeira thread obrigatória.' })
@@ -37,12 +36,47 @@ const ecoUpdateSchema = z.object({
 
 class EcoController {
   /**
-   * Lista todos os ecos, trazendo também as tags associadas via join.
+   * Lista todos os ecos, ou filtra por tag_id se fornecido na query.
+   * Retorna ecos com dados do usuário e suas tags associadas.
+   * Exemplo de uso: GET /eco?tag_id=uuid-da-tag
    */
   async index(request: Request, response: Response, next: NextFunction) {
     try {
-      // Busca todos os ecos
-      const ecos = await knexInstance<Eco>('eco').select('*');
+      const { tag_id } = request.query;
+
+      // Define as colunas explicitamente para evitar conflitos e garantir compatibilidade
+      const ecoSelect = [
+        'eco.id',
+        'eco.user_id',
+        'eco.thread_1',
+        'eco.thread_2',
+        'eco.thread_3',
+        'eco.created_at',
+        'eco.updated_at',
+        'register.codinome',
+        'register.avatar_url',
+        'register.genero',
+      ];
+
+      let ecosQuery;
+
+      if (tag_id) {
+        // Se houver filtro por tag_id, faz join com eco_tags e filtra
+        ecosQuery = knexInstance('eco')
+          .join('register', 'eco.user_id', 'register.id')
+          .join('eco_tags', 'eco.id', 'eco_tags.eco_id')
+          .where('eco_tags.tag_id', tag_id as string)
+          .select(ecoSelect)
+          .distinct(); // Evita duplicatas caso eco tenha mais de uma tag igual ao filtro
+      } else {
+        // Sem filtro, apenas join com register
+        ecosQuery = knexInstance('eco')
+          .join('register', 'eco.user_id', 'register.id')
+          .select(ecoSelect);
+      }
+
+      const ecos = await ecosQuery;
+
       // Para cada eco, busca as tags associadas via join (eco_tags + tags)
       const ecosWithTags = await Promise.all(
         ecos.map(async (eco) => {
@@ -55,6 +89,14 @@ class EcoController {
       );
       return response.json({ ecos: ecosWithTags });
     } catch (error) {
+      // Log detalhado do erro para depuração
+      const err = error as Error;
+      console.error('Erro no index do EcoController:', {
+        message: err && err.message ? err.message : String(error),
+        stack: err && err.stack ? err.stack : undefined,
+        error,
+        tag_id: request.query.tag_id,
+      });
       next(error);
     }
   }
@@ -65,7 +107,7 @@ class EcoController {
    */
   async create(request: Request, response: Response, next: NextFunction) {
     try {
-      // Validação dos dados recebidos
+      // Validação dos dados recebidos (não espera mais user_id)
       const validation = ecoSchema.safeParse(request.body);
       if (!validation.success) {
         const errorMessage =
@@ -73,16 +115,20 @@ class EcoController {
         throw new AppError(`Erro de validação: ${errorMessage}`, 400);
       }
 
-      const { user_id, thread_1, thread_2, thread_3, tag_ids } =
-        validation.data;
-
-      // Verifica se o usuário existe
-      const userExists = await knexInstance('register')
-        .where({ id: user_id })
-        .first();
-      if (!userExists) {
-        throw new AppError('Usuário não encontrado.', 404);
+      // Pega o user_id do JWT (request.user.id)
+      if (!request.user) {
+        throw new AppError('Usuário não autenticado.', 401);
       }
+      const user_id = request.user.id;
+      const { thread_1, thread_2, thread_3, tag_ids } = validation.data;
+
+      // Verifica se o usuário existe (opcional, pois JWT já garante)
+      // const userExists = await knexInstance('register')
+      //   .where({ id: user_id })
+      //   .first();
+      // if (!userExists) {
+      //   throw new AppError('Usuário não encontrado.', 404);
+      // }
 
       // Valida se as tags existem e se não há duplicadas
       const uniqueTagIds = Array.from(new Set(tag_ids));
@@ -101,7 +147,7 @@ class EcoController {
       const [eco] = await knexInstance<Eco>('eco')
         .insert({
           id: ecoId,
-          user_id,
+          user_id, // do JWT
           thread_1,
           thread_2: thread_2 || null,
           thread_3: thread_3 || null,
@@ -196,8 +242,17 @@ class EcoController {
     try {
       const { id } = request.params;
 
-      // Busca o eco pelo id
-      const eco = await knexInstance<Eco>('eco').where({ id }).first();
+      // Busca o eco pelo id com join para dados do usuário
+      const eco = await knexInstance('eco')
+        .join('register', 'eco.user_id', 'register.id')
+        .select(
+          'eco.*',
+          'register.codinome',
+          'register.avatar_url',
+          'register.genero'
+        )
+        .where('eco.id', id)
+        .first();
       if (!eco) {
         throw new AppError('Eco não encontrado.', 404);
       }

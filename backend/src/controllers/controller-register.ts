@@ -1,8 +1,10 @@
-import { Register } from '@/@types/register.ts';
+import type { Register } from '@/@types/register.ts';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
+import { authConfig } from '../config/auth.ts';
 import { knexInstance } from '../database/knex.ts';
 import { AppError } from '../utils/AppError.ts';
 
@@ -27,6 +29,13 @@ class RegisterController {
     }
   }
 
+  /**
+   * Cria um novo usuário, retorna dados públicos e token JWT.
+   * @param request - Request Express
+   * @param response - Response Express
+   * @param next - NextFunction Express
+   * @returns { user, token } se sucesso
+   */
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       // Validação dos dados recebidos
@@ -66,9 +75,26 @@ class RegisterController {
         avatar_url,
       });
 
+      // Busca o usuário recém-criado para retornar ao frontend
+      const [user] = await knexInstance('register')
+        .where({ email })
+        .select('id', 'codinome', 'avatar_url', 'genero')
+        .limit(1);
+
+      //] Gera o token JWT apenas com o id do usuário
+      const token = jwt.sign(
+        {}, //] Payload vazio, pois só há um tipo de usuário
+        authConfig.jwt.secret,
+        {
+          subject: user.id, //] ID do usuário como subject
+          expiresIn: authConfig.jwt.expiresIn, //] Expiração do token
+        }
+      );
+
+      //] Retorna o usuário criado (com id) e o token JWT
       return response
         .status(201)
-        .json({ message: 'Usuário registrado com sucesso!' });
+        .json({ message: 'Usuário registrado com sucesso!', user, token });
     } catch (error) {
       next(error);
     }
