@@ -1,5 +1,5 @@
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -13,79 +13,69 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Sussurro } from '../../backend/src/@types/sussurro';
+import { useSussurrosForm } from '../hooks/useSussurrosForm';
 
 const WIDTH = Dimensions.get('window').width;
 
 interface SussurrosModalProps {
   visible: boolean;
   onClose: () => void;
-  sussurros: string[];
-  onSussurrar: (novoSussurro: string) => void;
-}
-
-// Interface para cada sussurro (mock/futuro backend)
-interface SussurroItem {
-  id: string;
-  conteudo: string;
-  codinome: string;
-  avatar_url: string;
-  created_at: string | Date;
-}
-
-// Função mock para hora relativa (substituir por util real depois)
-function horaRelativa(date: string | Date) {
-  return 'há pouco'; // TODO: integrar dayjs ou date-fns
-}
-
-// Componente para exibir cada sussurro
-function SussurroCard({ sussurro }: { sussurro: SussurroItem }) {
-  return (
-    <View style={styles.sussurroCard}>
-      <Image
-        source={{ uri: sussurro.avatar_url }}
-        style={styles.sussurroAvatar}
-      />
-      <View style={styles.sussurroInfo}>
-        <View style={styles.sussurroHeader}>
-          <Text style={styles.sussurroCodinome}>{sussurro.codinome}</Text>
-          <Text style={styles.sussurroHora}>
-            {horaRelativa(sussurro.created_at)}
-          </Text>
-        </View>
-        <Text style={styles.sussurroConteudo}>{sussurro.conteudo}</Text>
-      </View>
-    </View>
-  );
+  ecoId: string;
 }
 
 export default function SussurrosModal({
   visible,
   onClose,
-  sussurros,
-  onSussurrar,
+  ecoId,
 }: SussurrosModalProps) {
-  const [novo, setNovo] = useState('');
+  // Hook de formulário para sussurros (dados reais do backend)
+  const {
+    sussurros,
+    novo,
+    setNovo,
+    loading,
+    error,
+    fetchSussurros,
+    enviarSussurro,
+  } = useSussurrosForm(ecoId);
 
-  // MOCK: transformar array simples em array de objetos (futuro: virá do backend)
-  const sussurrosData: SussurroItem[] = sussurros.map((conteudo, idx) => ({
-    id: String(idx),
-    conteudo,
-    codinome: 'eco_anon', // TODO: backend
-    avatar_url:
-      'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/anon-eco.png', // TODO: backend
-    created_at: new Date(), // TODO: backend
-  }));
+  // Busca sussurros ao abrir o modal
+  useEffect(() => {
+    if (visible) fetchSussurros();
+    // Dependências: visible e ecoId. Não inclua fetchSussurros para evitar loop infinito.
+  }, [visible, ecoId]);
 
-  // TODO: estados de loading/erro vindos do backend futuramente
-  const loading = false;
-  const error = null;
+  // Função para exibir hora relativa (pode ser melhorada com dayjs/date-fns)
+  function horaRelativa(date: string | Date) {
+    return 'há pouco'; // TODO: integrar dayjs ou date-fns
+  }
 
-  const handleSussurrar = () => {
-    if (novo.trim() && sussurros.length < 10) {
-      onSussurrar(novo.trim());
-      setNovo('');
-    }
-  };
+  // Componente para exibir cada sussurro
+  function SussurroCard({ sussurro }: { sussurro: Sussurro }) {
+    // Como o backend ainda não retorna avatar_url/codinome, usamos placeholder
+    const avatarUrl =
+      (sussurro as any).avatar_url ||
+      'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/anon-eco.png';
+    const codinome = (sussurro as any).codinome || 'eco_anon';
+    return (
+      <View style={styles.sussurroCard}>
+        <Image
+          source={{ uri: avatarUrl }}
+          style={styles.sussurroAvatar}
+        />
+        <View style={styles.sussurroInfo}>
+          <View style={styles.sussurroHeader}>
+            <Text style={styles.sussurroCodinome}>{codinome}</Text>
+            <Text style={styles.sussurroHora}>
+              {horaRelativa(sussurro.created_at)}
+            </Text>
+          </View>
+          <Text style={styles.sussurroConteudo}>{sussurro.conteudo}</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <Modal
@@ -116,18 +106,16 @@ export default function SussurrosModal({
             </TouchableOpacity>
           </View>
 
-          {/* Espaço para loading/erro do backend */}
+          {/* Loading e erro reais do backend */}
           {loading && <Text style={styles.semSussurros}>carregando...</Text>}
-          {error && (
-            <Text style={styles.semSussurros}>erro ao carregar sussurros.</Text>
-          )}
+          {error && <Text style={styles.semSussurros}>{error}</Text>}
 
-          {!loading && !error && sussurrosData.length === 0 && (
+          {!loading && !error && sussurros.length === 0 && (
             <Text style={styles.semSussurros}>nenhum sussurro ainda.</Text>
           )}
 
           <FlatList
-            data={sussurrosData}
+            data={sussurros}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.sussurrosList}
@@ -143,17 +131,19 @@ export default function SussurrosModal({
                 value={novo}
                 onChangeText={setNovo}
                 maxLength={100}
-                editable={sussurros.length < 10}
-                onSubmitEditing={handleSussurrar}
+                editable={sussurros.length < 10 && !loading}
+                onSubmitEditing={enviarSussurro}
                 returnKeyType='send'
               />
               <TouchableOpacity
                 style={[
                   styles.enviarBtn,
-                  (!novo.trim() || sussurros.length >= 10) && { opacity: 0.4 },
+                  (!novo.trim() || sussurros.length >= 10 || loading) && {
+                    opacity: 0.4,
+                  },
                 ]}
-                onPress={handleSussurrar}
-                disabled={!novo.trim() || sussurros.length >= 10}
+                onPress={enviarSussurro}
+                disabled={!novo.trim() || sussurros.length >= 10 || loading}
               >
                 <Text style={styles.enviarText}>sussurrar</Text>
               </TouchableOpacity>

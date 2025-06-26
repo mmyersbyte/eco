@@ -14,22 +14,7 @@ import ErrorModal from './components/ErrorModal';
 import SuccessModal from './components/SuccessModal';
 import ThreadInput from './components/ThreadInput';
 import useEcoForm from './hooks/useEcoForm';
-
-// Tags disponíveis (mesmo array do index.tsx)
-const TAGS_DISPONIVEIS = [
-  'Geral',
-  'Histórias boas',
-  'Traumas',
-  'Brigas de Rua',
-  'Sobrenatural',
-  'Histórias com Narcisista',
-  'Relacionamentos',
-  'Histórias no Trabalho',
-  'Estudos',
-  'Nunca contei para ninguém',
-  'Vivendo em Outro País',
-  'Acontecimentos Estranhos',
-];
+import { useTagsService } from './hooks/useTagsService';
 
 export default function EcoarScreen() {
   const router = useRouter();
@@ -39,40 +24,51 @@ export default function EcoarScreen() {
   const [showThread2, setShowThread2] = React.useState(false);
   const [showThread3, setShowThread3] = React.useState(false);
 
+  // Hook de tags oficiais
+  const {
+    tags,
+    loading: tagsLoading,
+    error: tagsError,
+    listarTags,
+  } = useTagsService();
+  React.useEffect(() => {
+    listarTags();
+  }, []);
+
   // Ícones por gênero
-  const getGeneroIcon = (genero: 'M' | 'F' | 'N') => {
+  const getGeneroIcon = (genero: 'M' | 'F' | 'O') => {
     switch (genero) {
       case 'M':
         return 'male';
       case 'F':
         return 'female';
-      case 'N':
-        return 'transgender-alt';
+      case 'O':
+        return 'transgender-alt'; // 'O' representa não-binário/outro
       default:
         return 'question';
     }
   };
 
-  const getGeneroColor = (genero: 'M' | 'F' | 'N') => {
+  const getGeneroColor = (genero: 'M' | 'F' | 'O') => {
     switch (genero) {
       case 'M':
         return '#4A90E2';
       case 'F':
         return '#E24A90';
-      case 'N':
+      case 'O':
         return '#9A4AE2';
       default:
         return '#AAA';
     }
   };
 
-  const toggleTag = (tag: string) => {
-    ecoForm.setTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev.filter((t) => t !== tag);
+  const toggleTag = (tagId: string) => {
+    ecoForm.setSelectedTagIds((prev) => {
+      if (prev.includes(tagId)) {
+        return prev.filter((t) => t !== tagId);
       } else {
         if (prev.length >= 3) return prev;
-        return [...prev, tag];
+        return [...prev, tagId];
       }
     });
   };
@@ -135,35 +131,45 @@ export default function EcoarScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Preview de tags */}
+        {/* Preview de tags oficiais do backend */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>tags do seu eco</Text>
           <View style={styles.tagsContainer}>
-            {TAGS_DISPONIVEIS.map((tag) => (
-              <TouchableOpacity
-                key={tag}
-                style={[
-                  styles.tagChip,
-                  ecoForm.tags.includes(tag) && styles.tagChipSelected,
-                ]}
-                onPress={() => toggleTag(tag)}
-                activeOpacity={0.7}
-              >
-                <FontAwesome5
-                  name='tag'
-                  size={10}
-                  color={ecoForm.tags.includes(tag) ? '#FFF' : '#666'}
-                />
-                <Text
+            {tagsLoading && (
+              <Text style={{ color: '#4A90E2' }}>carregando tags...</Text>
+            )}
+            {tagsError && <Text style={{ color: '#FF6B6B' }}>{tagsError}</Text>}
+            {!tagsLoading &&
+              !tagsError &&
+              tags.map((tag) => (
+                <TouchableOpacity
+                  key={tag.id}
                   style={[
-                    styles.tagText,
-                    ecoForm.tags.includes(tag) && styles.tagTextSelected,
+                    styles.tagChip,
+                    ecoForm.selectedTagIds.includes(tag.id) &&
+                      styles.tagChipSelected,
                   ]}
+                  onPress={() => toggleTag(tag.id)}
+                  activeOpacity={0.7}
                 >
-                  {tag}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <FontAwesome5
+                    name='tag'
+                    size={10}
+                    color={
+                      ecoForm.selectedTagIds.includes(tag.id) ? '#FFF' : '#666'
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.tagText,
+                      ecoForm.selectedTagIds.includes(tag.id) &&
+                        styles.tagTextSelected,
+                    ]}
+                  >
+                    {tag.nome}
+                  </Text>
+                </TouchableOpacity>
+              ))}
           </View>
         </View>
 
@@ -229,14 +235,14 @@ export default function EcoarScreen() {
             styles.publishButton,
             (ecoForm.loading ||
               !ecoForm.thread1.trim() ||
-              ecoForm.tags.length === 0) &&
+              ecoForm.selectedTagIds.length === 0) &&
               styles.publishButtonDisabled,
           ]}
           onPress={ecoForm.handleSubmit}
           disabled={
             ecoForm.loading ||
             !ecoForm.thread1.trim() ||
-            ecoForm.tags.length === 0
+            ecoForm.selectedTagIds.length === 0
           }
           activeOpacity={0.8}
         >

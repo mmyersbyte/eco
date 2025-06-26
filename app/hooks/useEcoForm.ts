@@ -16,7 +16,7 @@ export default function useEcoForm() {
   const [thread1, setThread1] = useState('');
   const [thread2, setThread2] = useState('');
   const [thread3, setThread3] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -51,18 +51,13 @@ export default function useEcoForm() {
       setShowErrorModal(true);
       return false;
     }
-    if (tags.length === 0) {
+    if (selectedTagIds.length === 0) {
       setErrorMessage('Selecione pelo menos uma tag para seu eco.');
       setShowErrorModal(true);
       return false;
     }
     if (thread1.length > 144 || thread2.length > 144 || thread3.length > 144) {
       setErrorMessage('Cada thread pode ter no máximo 144 caracteres.');
-      setShowErrorModal(true);
-      return false;
-    }
-    if (tags.some((t) => t.length > 40)) {
-      setErrorMessage('Cada tag pode ter no máximo 40 caracteres.');
       setShowErrorModal(true);
       return false;
     }
@@ -85,12 +80,12 @@ export default function useEcoForm() {
         thread_1: thread1,
         thread_2: thread2 || undefined,
         thread_3: thread3 || undefined,
-        tags,
+        tag_ids: selectedTagIds,
       });
       setThread1('');
       setThread2('');
       setThread3('');
-      setTags([]);
+      setSelectedTagIds([]);
       setShowSuccessModal(true);
     } catch (err: any) {
       let msg = 'Erro ao publicar eco. Tente novamente.';
@@ -111,8 +106,8 @@ export default function useEcoForm() {
     setThread2,
     thread3,
     setThread3,
-    tags,
-    setTags,
+    selectedTagIds,
+    setSelectedTagIds,
     loading,
     errorMessage,
     showErrorModal,

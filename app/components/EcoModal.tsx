@@ -39,26 +39,26 @@ const SPACING = {
 };
 
 // Funções auxiliares movidas para fora do componente
-const getGeneroIcon = (genero: 'M' | 'F' | 'N'): string => {
+const getGeneroIcon = (genero: 'M' | 'F' | 'O'): string => {
   switch (genero) {
     case 'M':
       return 'male';
     case 'F':
       return 'female';
-    case 'N':
-      return 'transgender-alt';
+    case 'O':
+      return 'transgender-alt'; // 'O' representa não-binário/outro
     default:
       return 'question';
   }
 };
 
-const getGeneroColor = (genero: 'M' | 'F' | 'N'): string => {
+const getGeneroColor = (genero: 'M' | 'F' | 'O'): string => {
   switch (genero) {
     case 'M':
       return COLORS.primary;
     case 'F':
       return COLORS.secondary;
-    case 'N':
+    case 'O':
       return COLORS.tertiary;
     default:
       return COLORS.textTertiary;
@@ -78,13 +78,22 @@ export default function EcoModal({
   eco,
   onSussurrar,
 }: EcoModalProps) {
-  if (!eco) return null;
-
   // Memoização das threads para otimizar performance
-  const threads = useMemo(
-    () => [eco.thread_1, eco.thread_2, eco.thread_3].filter(Boolean),
-    [eco.thread_1, eco.thread_2, eco.thread_3]
-  );
+  const threads = useMemo(() => {
+    return eco
+      ? [eco.thread_1, eco.thread_2, eco.thread_3].filter(Boolean)
+      : [];
+  }, [eco]);
+
+  // Placeholders para dados do usuário
+  const codinome = eco?.codinome || 'anônimo';
+  const avatarUrl =
+    eco?.avatar_url ||
+    'https://eco-avatars.s3.sa-east-1.amazonaws.com/eco-avatars/placeholder-eco.png';
+  const genero = eco?.genero || 'N';
+  const sussurros = Array.isArray(eco?.sussurros) ? eco.sussurros : [];
+
+  if (!eco) return null;
 
   return (
     <Modal
@@ -98,16 +107,16 @@ export default function EcoModal({
           {/* Header com perfil */}
           <View style={styles.header}>
             <Image
-              source={{ uri: eco.avatar_url }}
+              source={{ uri: avatarUrl }}
               style={styles.avatar}
             />
             <View style={styles.profileInfo}>
               <View style={styles.codinomeRow}>
-                <Text style={styles.codinome}>{eco.codinome}</Text>
+                <Text style={styles.codinome}>{codinome}</Text>
                 <FontAwesome5
-                  name={getGeneroIcon(eco.genero)}
+                  name={getGeneroIcon(genero)}
                   size={12}
-                  color={getGeneroColor(eco.genero)}
+                  color={getGeneroColor(genero)}
                   style={styles.generoIcon}
                 />
               </View>
@@ -134,30 +143,25 @@ export default function EcoModal({
               contentContainerStyle={styles.scrollContent}
             >
               {/* Tags */}
-              {eco.tags.length > 0 && (
-                <View style={styles.tagsSection}>
-                  <View style={styles.tagsContainer}>
-                    {eco.tags.map((tag, index) => (
-                      <View
-                        key={index}
-                        style={[
-                          styles.tagChip,
-                          index > 0 && { marginLeft: SPACING.xs },
-                          index >= 2 &&
-                            index % 2 === 0 && { marginTop: SPACING.xs },
-                        ]}
-                      >
-                        <FontAwesome5
-                          name='tag'
-                          size={8}
-                          color={COLORS.textSecondary}
-                        />
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
+              {Array.isArray(eco.tags) &&
+                eco.tags.map((tag, index) => (
+                  <View
+                    key={tag.id || index}
+                    style={[
+                      styles.tagChip,
+                      index > 0 && { marginLeft: SPACING.xs },
+                      index >= 2 &&
+                        index % 2 === 0 && { marginTop: SPACING.xs },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name='tag'
+                      size={8}
+                      color={COLORS.textSecondary}
+                    />
+                    <Text style={styles.tagText}>{tag.nome}</Text>
                   </View>
-                </View>
-              )}
+                ))}
 
               {/* Threads */}
               <View style={styles.threadsSection}>
@@ -181,7 +185,7 @@ export default function EcoModal({
 
           {/* Footer com ações */}
           <View style={styles.footer}>
-            {eco.sussurros.length < 10 && onSussurrar && (
+            {sussurros.length < 10 && onSussurrar && (
               <TouchableOpacity
                 style={styles.sussurrarBtn}
                 onPress={onSussurrar}
@@ -194,9 +198,9 @@ export default function EcoModal({
             )}
 
             <Text style={styles.sussurrosCount}>
-              {eco.sussurros.length >= 10
+              {sussurros.length >= 10
                 ? 'eco cheio.'
-                : `${eco.sussurros.length} sussurros.`}
+                : `${sussurros.length} sussurros.`}
             </Text>
           </View>
         </View>

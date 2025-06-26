@@ -1,6 +1,6 @@
-import { FontAwesome5 } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -13,26 +13,22 @@ import {
 } from 'react-native';
 import EcoModal from './components/EcoModal';
 import SussurrosModal from './components/SussurrosModal';
-import TagHeader from './components/TagHeader';
-import { useEcoDetalhe } from './hooks/useEcoDetalhe';
 import { FeedItem, useFeed } from './hooks/useFeed';
-import { useTagsService } from './hooks/useTagsService';
+
 const WIDTH = Dimensions.get('window').width;
 
 /**
- * Tela principal de exibição dos ecos.
- * Mostra o feed, permite abrir detalhes e sussurros de cada eco.
- * Permite filtrar por tag ao clicar em uma tag de um eco (filtro restritivo).
+ * Feed geral de ecos (sem filtro de tag).
+ * Tela única, clean, sem headers ou tags antigos.
  */
-export default function Ecos() {
-  // Recebe a tag da query string (params)
-  const { tag } = useLocalSearchParams();
+export default function AllEcos() {
   const router = useRouter();
-  // Busca o feed real do backend, filtrando por tag se necessário
-  const { feed, listarFeed, loading } = useFeed(tag as string | undefined);
+  // Busca o feed real do backend, sem filtro de tag
+  const { feed, listarFeed, loading } = useFeed();
   // Controla visibilidade dos modais
-  const [ecoModalVisible, setEcoModalVisible] = useState(false);
-  const [sussurrosModalVisible, setSussurrosModalVisible] = useState(false);
+  const [ecoModalVisible, setEcoModalVisible] = React.useState(false);
+  const [sussurrosModalVisible, setSussurrosModalVisible] =
+    React.useState(false);
 
   // Hook para buscar detalhes completos do eco selecionado
   const {
@@ -40,24 +36,21 @@ export default function Ecos() {
     loading: loadingEco,
     error: errorEco,
     buscarEco,
-  } = useEcoDetalhe();
+  } = require('./hooks/useEcoDetalhe').useEcoDetalhe();
 
-  // Hook para buscar todas as tags (para exibir nome da tag filtrada)
-  const { tags, listarTags } = useTagsService();
-  useEffect(() => {
-    listarTags();
-  }, []);
-
-  // Atualiza o feed ao trocar a tag
   useEffect(() => {
     listarFeed();
-  }, [tag]);
+  }, []);
 
-  /**
-   * Retorna o ícone do gênero para exibição.
-   * @param genero 'M' | 'F' | 'O'
-   */
-  const getGeneroIcon = (genero: 'M' | 'F' | 'O') => {
+  // Função utilitária para garantir compatibilidade do gênero
+  function normalizarGenero(genero: string): 'M' | 'F' | 'O' {
+    if (genero === 'N') return 'O';
+    if (genero === 'M' || genero === 'F' || genero === 'O') return genero;
+    return 'O';
+  }
+
+  // Funções auxiliares para ícone e cor do gênero
+  function getGeneroIcon(genero: 'M' | 'F' | 'O'): string {
     switch (genero) {
       case 'M':
         return 'male';
@@ -68,13 +61,9 @@ export default function Ecos() {
       default:
         return 'question';
     }
-  };
+  }
 
-  /**
-   * Retorna a cor do gênero para exibição.
-   * @param genero 'M' | 'F' | 'O'
-   */
-  const getGeneroColor = (genero: 'M' | 'F' | 'O') => {
+  function getGeneroColor(genero: 'M' | 'F' | 'O'): string {
     switch (genero) {
       case 'M':
         return '#4A90E2';
@@ -85,38 +74,6 @@ export default function Ecos() {
       default:
         return '#AAA';
     }
-  };
-
-  /**
-   * Ao clicar em uma tag, atualiza a URL e filtra o feed por aquela tag.
-   * @param tagObj { id: string, nome: string }
-   */
-  const handleTagPress = (tagObj: { id: string; nome: string }) => {
-    router.replace({ pathname: '/ecos', params: { tag: tagObj.id } });
-  };
-
-  /**
-   * Ao clicar em um card, busca os detalhes completos do eco e abre o modal.
-   * @param item FeedItem
-   */
-  const handleCardPress = async (item: FeedItem) => {
-    await buscarEco(item.id);
-    setEcoModalVisible(true);
-  };
-
-  /**
-   * Ao clicar em sussurrar, fecha o modal do eco e abre o de sussurros.
-   */
-  const handleSussurrarPress = () => {
-    setEcoModalVisible(false);
-    setSussurrosModalVisible(true);
-  };
-
-  // Função utilitária para garantir compatibilidade do gênero
-  function normalizarGenero(genero: string): 'M' | 'F' | 'O' {
-    if (genero === 'N') return 'O';
-    if (genero === 'M' || genero === 'F' || genero === 'O') return genero;
-    return 'O';
   }
 
   // Função utilitária para contar quantas threads existem no eco
@@ -138,21 +95,48 @@ export default function Ecos() {
     return `${dia}/${mes}/${ano}`;
   }
 
-  // Busca o nome da tag filtrada (ou 'geral' se não houver filtro)
-  const nomeTagAtual = tag
-    ? tags.find((t) => t.id === tag)?.nome || 'tag'
-    : 'geral';
+  // Handler para abrir modal de eco
+  const handleCardPress = async (item: FeedItem) => {
+    await buscarEco(item.id);
+    setEcoModalVisible(true);
+  };
+
+  // Handler para abrir modal de sussurros
+  const handleSussurrarPress = () => {
+    setEcoModalVisible(false);
+    setSussurrosModalVisible(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header minimalista sempre presente */}
-      <TagHeader
-        {...(tag ? { onBack: () => router.replace('/') } : {})}
-        nomeTag={nomeTagAtual}
-        iconColor='#AAAAAA'
-        iconSize={17}
-      />
-      {/* Lista de ecos filtrados por tag */}
+      {/* Header minimalista: botão de voltar à esquerda, título centralizado, sem cor azul */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+          accessibilityRole='button'
+          accessibilityLabel='Voltar'
+        >
+          <Ionicons
+            name='arrow-back'
+            size={22}
+            color='#AAA'
+          />
+        </TouchableOpacity>
+        <View style={styles.headerTitleRow}>
+          <FontAwesome5
+            name='tag'
+            size={15}
+            color='#AAA'
+            style={styles.headerTagIcon}
+          />
+          <Text style={styles.headerTitle}>geral.</Text>
+        </View>
+        {/* Espaço para manter o título centralizado */}
+        <View style={styles.rightSpacer} />
+      </View>
+      {/* Lista de ecos reais do backend */}
       {loading ? (
         <Text style={{ color: '#4A90E2', textAlign: 'center', marginTop: 40 }}>
           carregando ecos...
@@ -211,14 +195,13 @@ export default function Ecos() {
                 </View>
                 <Text style={styles.historia}>{item.thread_1}</Text>
               </View>
-              {/* Tags do eco - agora clicáveis para filtrar */}
+              {/* Tags do eco - apenas visual, sem filtro */}
               <View
                 style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}
               >
                 {item.tags.map((tagObj) => (
-                  <TouchableOpacity
+                  <View
                     key={tagObj.id}
-                    onPress={() => handleTagPress(tagObj)}
                     style={{
                       backgroundColor: '#232A34',
                       borderRadius: 10,
@@ -231,7 +214,7 @@ export default function Ecos() {
                     <Text style={{ color: '#4A90E2', fontSize: 11 }}>
                       {tagObj.nome}
                     </Text>
-                  </TouchableOpacity>
+                  </View>
                 ))}
               </View>
               {/* Divisor UX agradável entre cards */}
@@ -288,24 +271,53 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F0F0F',
     justifyContent: 'center',
   },
-  searchContainer: {
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 42,
-    marginBottom: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    marginBottom: 2,
+    minHeight: 40,
+    backgroundColor: 'transparent',
+    borderBottomWidth: 0,
   },
-  searchBox: {
-    width: '70%',
-    height: 34,
-    backgroundColor: 'rgba(30,30,30,0.82)',
-    borderRadius: 22,
-    paddingHorizontal: 14,
+  backButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    borderWidth: 0,
+    marginRight: 2,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    gap: 6,
+  },
+  headerTagIcon: {
+    marginRight: 4,
+    marginTop: 1,
+  },
+  headerTitle: {
     color: '#DDD',
     fontSize: 15,
-    fontWeight: '300',
-    textAlign: 'center',
+    fontWeight: '500',
+    textTransform: 'lowercase',
     letterSpacing: 1,
-    borderWidth: 0,
-    opacity: 0.85,
+    opacity: 0.7,
+    marginLeft: 2,
+  },
+  rightSpacer: {
+    width: 32,
+    height: 32,
+  },
+  addButton: {
+    display: 'none', // Esconde o botão + para o header minimalista
   },
   flatlistContainer: {
     alignItems: 'center',
@@ -322,13 +334,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     paddingVertical: 24,
   },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'transparent',
-    marginBottom: 10,
-    opacity: 0.55,
+  userInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 10,
+  },
+  userInfoTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   codinomeContainer: {
     flexDirection: 'row',
@@ -347,16 +361,23 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     opacity: 0.4,
   },
-  titulo: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '300',
-    marginTop: 4,
-    marginBottom: 16,
-    textAlign: 'center',
-    letterSpacing: 1,
-    opacity: 0.5,
+  dataPublicacao: {
+    color: '#888',
+    fontSize: 11,
+    marginTop: 2,
+    marginLeft: 2,
+    letterSpacing: 0.5,
     textTransform: 'lowercase',
+  },
+  threadCount: {
+    color: '#AAA',
+    fontSize: 11,
+    opacity: 0.6,
+    letterSpacing: 0.5,
+    textTransform: 'lowercase',
+    textAlign: 'right',
+    flex: 0,
+    minWidth: 54,
   },
   historia: {
     color: '#CCC',
@@ -369,59 +390,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     letterSpacing: 0.2,
   },
-  sussurrosBtn: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: 'rgba(30,30,30,0.35)',
-  },
-  sussurrosText: {
-    color: '#AAA',
-    fontSize: 14,
-    letterSpacing: 1,
-    textTransform: 'lowercase',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  footer: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 18,
-    paddingTop: 14,
-  },
-  footerBtn: {
-    paddingHorizontal: 26,
-    paddingVertical: 7,
-    borderRadius: 18,
-    backgroundColor: '#181818',
-    opacity: 0.65,
-  },
-  footerBtnText: {
-    color: '#AAA',
-    fontSize: 13,
-    letterSpacing: 1,
-    fontWeight: '500',
-    textTransform: 'lowercase',
-  },
-  userInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    gap: 10,
-  },
-  userInfoTextContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  dataPublicacao: {
-    color: '#888',
-    fontSize: 11,
-    marginTop: 2,
-    marginLeft: 2,
-    letterSpacing: 0.5,
-    textTransform: 'lowercase',
-  },
   cardDivider: {
     height: 1,
     backgroundColor: '#232A34',
@@ -431,14 +399,12 @@ const styles = StyleSheet.create({
     opacity: 0.18,
     width: '100%',
   },
-  threadCount: {
-    color: '#AAA',
-    fontSize: 11,
-    opacity: 0.6,
-    letterSpacing: 0.5,
-    textTransform: 'lowercase',
-    textAlign: 'right',
-    flex: 0,
-    minWidth: 54,
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'transparent',
+    marginBottom: 10,
+    opacity: 0.55,
   },
 });

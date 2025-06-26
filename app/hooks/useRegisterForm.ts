@@ -40,7 +40,7 @@ export default function useRegisterForm() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmSenha, setConfirmSenha] = useState('');
-  const [genero, setGenero] = useState<'M' | 'F' | 'N' | null>(null);
+  const [genero, setGenero] = useState<'M' | 'F' | 'O' | null>(null);
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   const [aceitouTermos, setAceitouTermos] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -129,16 +129,11 @@ export default function useRegisterForm() {
         email,
         senha,
         codinome: codinomeAtual,
-        genero: genero as 'M' | 'F' | 'N',
+        genero: genero as 'M' | 'F' | 'O',
         avatar_url: avatars[selectedAvatarIndex],
       };
-      await api.post('/register', payload);
-      await setItem('eco_user', {
-        email,
-        codinome: codinomeAtual,
-        avatar_url: avatars[selectedAvatarIndex],
-        genero,
-      });
+      const res = await api.post('/register', payload); // Faz o cadastro e recebe o usuário criado
+      await setItem('eco_user', res.data.user); // Salva o usuário completo (com id) no storage
       resetarFormulario();
       router.push('/ecoar');
     } catch (err: any) {

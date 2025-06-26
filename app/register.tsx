@@ -66,14 +66,15 @@ export default function CadastroScreen() {
 
         <Text style={styles.label}>selecione seu gênero</Text>
         <View style={styles.generoContainer}>
-          {['M', 'F', 'N'].map((g) => (
+          {/* O backend espera 'O' para não binário, não 'N' */}
+          {['M', 'F', 'O'].map((g) => (
             <TouchableOpacity
               key={g}
               style={[
                 styles.generoBtn,
                 cadastro.genero === g && styles.generoBtnSelected,
               ]}
-              onPress={() => cadastro.setGenero(g as 'M' | 'F' | 'N')}
+              onPress={() => cadastro.setGenero(g as 'M' | 'F' | 'O')}
             >
               <Text
                 style={[
@@ -81,11 +82,7 @@ export default function CadastroScreen() {
                   cadastro.genero === g && styles.generoBtnTextSelected,
                 ]}
               >
-                {g === 'M'
-                  ? 'Masculino'
-                  : g === 'F'
-                  ? 'Feminino'
-                  : 'Não-binário'}
+                {g === 'M' ? 'Masculino' : g === 'F' ? 'Feminino' : 'Outro'}
               </Text>
             </TouchableOpacity>
           ))}

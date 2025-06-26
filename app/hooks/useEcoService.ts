@@ -23,7 +23,7 @@ export interface EcoPayload {
   thread_1: string;
   thread_2?: string;
   thread_3?: string;
-  tags: string[];
+  tag_ids: string[];
 }
 
 export function useEcoService() {
@@ -38,6 +38,10 @@ export function useEcoService() {
   async function publicarEco(payload: EcoPayload) {
     setLoading(true);
     setError(null);
+    console.log(
+      '[ECO] Payload enviado para publicação:',
+      JSON.stringify(payload, null, 2)
+    );
     try {
       const response = await api.post('/eco', payload);
       return response.data;

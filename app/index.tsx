@@ -1,6 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,28 +10,33 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-const TAGS = [
-  'Geral', // Todas as histórias
-  'Histórias boas',
-  'Traumas',
-  'Brigas de Rua',
-  'Sobrenatural',
-  'Histórias com Narcisista',
-  'Relacionamentos',
-  'Histórias no Trabalho',
-  'Estudos',
-  'Nunca contei para ninguém',
-  'Vivendo em Outro País',
-  'Acontecimentos Estranhos',
-];
+import { useTagsService } from './hooks/useTagsService';
 
 export default function App() {
   const router = useRouter();
+  const {
+    tags,
+    loading: tagsLoading,
+    error: tagsError,
+    listarTags,
+  } = useTagsService();
+
+  // Busca as tags oficiais do backend apenas uma vez ao montar
+  useEffect(() => {
+    listarTags();
+  }, []);
+
+  // Tag "Geral" para filtrar todas as publicações
+  const allTags = [{ id: 'all', nome: 'Geral' }, ...tags];
 
   function handleTagPress(tag: string) {
-    // Envia a tag pela query string
-    router.push({ pathname: '/ecos', params: { tag } });
+    // Se for a tag "Geral", não filtra por nenhuma tag específica
+    if (tag === 'Geral' || tag === 'all') {
+      router.push('/allEcos');
+    } else {
+      // Envia a tag pela query string
+      router.push({ pathname: '/ecos', params: { tag } });
+    }
   }
 
   return (
@@ -56,11 +61,11 @@ export default function App() {
         contentContainerStyle={styles.tagsContainer}
         showsVerticalScrollIndicator={false}
       >
-        {TAGS.map((tag) => (
+        {allTags.map((tag) => (
           <TouchableOpacity
-            key={tag}
+            key={tag.id}
             style={styles.tagWrapper}
-            onPress={() => handleTagPress(tag)}
+            onPress={() => handleTagPress(tag.id)}
             activeOpacity={0.75}
           >
             <FontAwesome5
@@ -68,7 +73,7 @@ export default function App() {
               size={12}
               color='#888'
             />
-            <Text style={styles.tagText}>{tag}</Text>
+            <Text style={styles.tagText}>{tag.nome}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

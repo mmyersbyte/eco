@@ -5,7 +5,7 @@
 export const prefixos = [
   'sussurro',
   'eco',
-  'murmuro',
+  'medo',
   'sopro',
   'brisa',
   'vento',
@@ -33,7 +33,7 @@ export const prefixos = [
   'zen',
   'karma',
   'chakra',
-  'mandala',
+  'credo',
   'cristal',
   'prism',
   'fractal',
