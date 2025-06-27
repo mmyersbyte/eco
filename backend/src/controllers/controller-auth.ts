@@ -1,22 +1,31 @@
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { z } from 'zod';
 import type { Register } from '../@types/register.d.ts';
 import { authConfig } from '../config/auth.ts';
 import { knexInstance } from '../database/knex.ts';
 import { AppError } from '../utils/AppError.ts';
 
 class AuthController {
-  /**
-   * Autentica o usuário e retorna um token JWT se válido.
-   * @param request - Request Express
-   * @param response - Response Express
-   * @param next - NextFunction Express
-   * @returns { user, token } se sucesso
-   */
+  // Esquema de validação para login
+  private static loginSchema = z.object({
+    email: z.string().email({ message: 'Email inválido.' }),
+    senha: z
+      .string()
+      .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
+  });
+
   async auth(request: Request, response: Response, next: NextFunction) {
     try {
-      const { email, senha } = request.body;
+      // Validação dos dados recebidos
+      const validation = AuthController.loginSchema.safeParse(request.body);
+      if (!validation.success) {
+        const errorMessage =
+          validation.error.errors[0]?.message || 'Dados inválidos.';
+        throw new AppError(`Erro de validação: ${errorMessage}`, 400);
+      }
+      const { email, senha } = validation.data;
 
       // Busca usuário pelo email
       const user = await knexInstance<Register>('register')
