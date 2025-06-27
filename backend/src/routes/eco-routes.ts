@@ -4,11 +4,13 @@ import { ensureAuthenticated } from '../middlewares/ensureAuthenticated .ts'; //
 
 const ecoRoutes = Router();
 const ecoController = new EcoController();
-
-// Protege a rota de criação de eco: só usuários autenticados podem criar
-ecoRoutes.post('/', ensureAuthenticated, ecoController.create);
+// Usuários não autenticados podem ver todos os ecos
 ecoRoutes.get('/', ecoController.index);
+ecoRoutes.get('/:id', ecoController.show);
+
+// Protege a rota de criação de eco: só usuários autenticados podem criar, atualizar e deletar
+ecoRoutes.use(ensureAuthenticated);
+ecoRoutes.post('/', ecoController.create);
 ecoRoutes.patch('/:id', ecoController.update);
 ecoRoutes.delete('/:id', ecoController.delete);
-ecoRoutes.get('/:id', ecoController.show);
 export { ecoRoutes };
