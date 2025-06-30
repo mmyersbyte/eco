@@ -1,18 +1,25 @@
+import { randomUUID } from 'crypto';
 import request from 'supertest';
 import { afterAll, describe, expect, it } from 'vitest';
 import app from '../src/app';
-import { knexInstance } from '../src/database/knex'; // ajuste o caminho se necessário
+import { knexInstance } from '../src/database/knex';
 
 // Gera um email aleatório para evitar conflito
 function randomEmail() {
-  return `testuser_${Date.now()}@test.com`;
+  return `testuser_${randomUUID()}@test.com`;
+}
+
+// Gera um codinome aleatório para evitar conflito
+function randomCodinome() {
+  return `TestUser_${randomUUID()}`;
 }
 
 describe('Register API', () => {
-  // Limpa o usuário de teste após rodar os testes
+  // Limpa os usuários de teste após rodar os testes
   afterAll(async () => {
     await knexInstance('register')
       .where('email', 'like', 'testuser_%@test.com')
+      .orWhere('codinome', 'like', 'TestUser_%')
       .del();
   });
 
@@ -20,7 +27,7 @@ describe('Register API', () => {
     const newUser = {
       email: randomEmail(),
       senha: 'senha123',
-      codinome: 'TestUser',
+      codinome: randomCodinome(), // Agora é único!
       genero: 'M',
       avatar_url: 'https://example.com/avatar.png',
     };
@@ -39,7 +46,7 @@ describe('Register API', () => {
     const userData = {
       email,
       senha: 'senha123',
-      codinome: 'TestUser2',
+      codinome: randomCodinome(),
       genero: 'F',
       avatar_url: 'https://example.com/avatar2.png',
     };
@@ -52,11 +59,12 @@ describe('Register API', () => {
       .post('/register')
       .send({
         ...userData,
-        codinome: 'OutroCodinome',
+        codinome: randomCodinome(), // codinome diferente, mas email igual
       });
 
     expect(response.status).toBe(409);
-    expect(response.body).toHaveProperty('error');
+    expect(response.body).toHaveProperty('status', 'error');
+    expect(response.body).toHaveProperty('message');
   });
 
   it('should not allow registration with invalid data', async () => {
@@ -71,6 +79,7 @@ describe('Register API', () => {
     const response = await request(app).post('/register').send(invalidUser);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+    expect(response.body).toHaveProperty('status', 'error');
+    expect(response.body).toHaveProperty('message');
   });
 });
