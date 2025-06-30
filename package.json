@@ -48,7 +48,9 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "jsonwebtoken": "^9.0.2",
-    "typescript": "~5.8.3"
+    "supertest": "^7.1.1",
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.4"
   },
   "private": true
 }
