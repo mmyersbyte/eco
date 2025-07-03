@@ -1,36 +1,57 @@
 ┌──────────────────────────────┐
-│ register │
+│ register                     │
 │ ──────────────────────────── │
-│ id PK (uuid) │
-│ email unique │
-│ senha │
-│ codinome unique │
-│ genero │
-│ avatar_url │
-│ created_at │
-│ updated_at │
+│ id PK (uuid)                 │
+│ email unique                 │
+│ senha                        │
+│ codinome unique              │
+│ genero                       │
+│ avatar_url                   │
+│ created_at                   │
+│ updated_at                   │
 └─────────────┬────────────────┘
-│
-(1) │ (N)
-│
+              │
+           (1) │ (N)
+              │
 ┌─────────────▼────────────────┐
-│ ecos │
+│ eco                          │
 │ ──────────────────────────── │
-│ id PK (uuid) │
-│ user_id FK -> register │
-│ titulo │
-│ historia │
-│ created_at │
-│ updated_at │
+│ id PK (uuid)                 │
+│ user_id FK -> register       │
+│ thread_1                     │
+│ thread_2                     │
+│ thread_3                     │
+│ created_at                   │
+│ updated_at                   │
 └─────────────┬────────────────┘
-│
-(1) │ (N)
-│
+              │
+           (1) │ (N)
+              │
 ┌─────────────▼────────────────┐
-│ sussurros │
+│ sussurro                     │
 │ ──────────────────────────── │
-│ id PK (uuid) │
-│ eco_id FK -> ecos │
-│ conteudo │
-│ created_at │
+│ id PK (uuid)                 │
+│ eco_id FK -> eco             │
+│ conteudo                     │
+│ created_at                   │
+│ updated_at                   │
+└──────────────────────────────┘
+
+┌──────────────────────────────┐
+│ tags                         │
+│ ──────────────────────────── │
+│ id PK (uuid)                 │
+│ nome unique                  │
+│ created_at                   │
+└─────────────┬────────────────┘
+              │
+           (N) │ (N)
+              │
+┌─────────────▼────────────────┐
+│ eco_tags                     │
+│ ──────────────────────────── │
+│ eco_id FK -> eco             │
+│ tag_id FK -> tags            │
+│ created_at                   │
+│ PK (eco_id, tag_id)          │
 └──────────────────────────────┘
