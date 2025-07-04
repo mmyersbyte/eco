@@ -53,17 +53,24 @@ class AuthController {
         }
       );
 
-      // Retorna apenas dados públicos do usuário e o token
-      return response.status(200).json({
-        message: 'Login realizado com sucesso!',
-        user: {
-          id: user.id,
-          codinome: user.codinome,
-          avatar_url: user.avatar_url,
-          genero: user.genero,
-        },
-        token, // Token JWT para autenticação
-      });
+      // Envia o token como cookie httpOnly
+      return response
+        .cookie('token', token, {
+          httpOnly: true, // Só servidor acessa
+          secure: process.env.NODE_ENV === 'production', // HTTPS em prod
+          sameSite: 'strict', // Proteção CSRF
+          maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        })
+        .status(200)
+        .json({
+          message: 'Login realizado com sucesso!',
+          user: {
+            id: user.id,
+            codinome: user.codinome,
+            avatar_url: user.avatar_url,
+            genero: user.genero,
+          },
+        });
     } catch (error) {
       next(error);
     }

@@ -41,13 +41,21 @@ describe('Register API', () => {
 
     // Espera status 201 (criado)
     expect(response.status).toBe(201);
-    // Deve retornar o objeto user e o token JWT
+    // Deve retornar o objeto user
     expect(response.body).toHaveProperty('user');
-    expect(response.body).toHaveProperty('token');
+    // Não deve retornar o token no body
+    expect(response.body).not.toHaveProperty('token');
     // O usuário deve ter um id gerado
     expect(response.body.user).toHaveProperty('id');
     // O email não deve ser retornado por segurança
     expect(response.body.user.email).toBeUndefined();
+    // O token deve estar no cookie
+    const cookies = response.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+    const cookiesArr = Array.isArray(cookies) ? cookies : [cookies];
+    const tokenCookie = cookiesArr.find((c) => c.startsWith('token='));
+    expect(tokenCookie).toBeDefined();
+    expect(tokenCookie).toMatch(/HttpOnly/);
   });
 
   // Testa se o sistema impede cadastro com email já existente
@@ -62,7 +70,8 @@ describe('Register API', () => {
     };
 
     // Primeiro cadastro com sucesso
-    await request(app).post('/register').send(userData);
+    const firstResponse = await request(app).post('/register').send(userData);
+    expect(firstResponse.status).toBe(201); // Garantir que o primeiro cadastro foi bem-sucedido
 
     // Segunda tentativa com o mesmo email, mas codinome diferente
     const response = await request(app)

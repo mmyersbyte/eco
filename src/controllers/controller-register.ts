@@ -83,18 +83,24 @@ class RegisterController {
 
       //] Gera o token JWT apenas com o id do usuário
       const token = jwt.sign(
-        {}, //] Payload vazio, pois só há um tipo de usuário
+        {}, // Payload vazio, pois só há um tipo de usuário
         authConfig.jwt.secret,
         {
-          subject: user.id, //] ID do usuário como subject
-          expiresIn: authConfig.jwt.expiresIn, //] Expiração do token
+          subject: user.id, // ID do usuário como subject
+          expiresIn: authConfig.jwt.expiresIn, // Expiração do token
         }
       );
 
-      //] Retorna o usuário criado (com id) e o token JWT
+      //] Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
       return response
+        .cookie('token', token, {
+          httpOnly: true, // Só servidor acessa
+          secure: process.env.NODE_ENV === 'production', // HTTPS em prod
+          sameSite: 'strict', // Proteção CSRF
+          maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        })
         .status(201)
-        .json({ message: 'Usuário registrado com sucesso!', user, token });
+        .json({ message: 'Usuário registrado com sucesso!', user });
     } catch (error) {
       next(error);
     }
