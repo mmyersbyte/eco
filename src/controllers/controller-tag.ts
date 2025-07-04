@@ -17,7 +17,7 @@ class TagController {
     }
   }
 
-  // Criar nova tag (opcional, uso de admin)
+  // Criar nova tag ( uso de admin)
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       // Validação básica

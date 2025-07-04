@@ -58,8 +58,9 @@ class AuthController {
         .cookie('token', token, {
           httpOnly: true, // Só servidor acessa
           secure: process.env.NODE_ENV === 'production', // HTTPS em prod
-          sameSite: 'strict', // Proteção CSRF
+          sameSite: 'lax', // Proteção CSRF
           maxAge: 24 * 60 * 60 * 1000, // 24 horas
+          path: '/', // importante: deve ser igual ao path do cookie JWT
         })
         .status(200)
         .json({
