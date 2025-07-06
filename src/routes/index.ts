@@ -8,9 +8,10 @@ import { logoutRoutes } from './logout-routes.ts';
 import { profileRoutes } from './profile-routes.ts';
 import { registerRoutes } from './register-routes.ts';
 import { sussurroRoutes } from './sussurro-eco.ts';
+import { swaggerRoutes } from './swagger-routes.ts';
 import { tagRoutes } from './tag-routes.ts';
 
-export const routes = Router();
+const routes = Router();
 
 routes.use(helmet());
 routes.use(rateLimiter);
@@ -21,5 +22,8 @@ routes.use('/sussurro', sussurroRoutes);
 routes.use('/tags', tagRoutes);
 routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
+routes.use(swaggerRoutes);
 routes.use(rateLimiter);
 routes.use(notFoundHandler);
+
+export { routes };
