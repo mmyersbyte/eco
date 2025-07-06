@@ -18,16 +18,31 @@ class SussurroController {
   // Listar todos os sussurros (ou listar por eco, se quiser)
   async index(request: Request, response: Response, next: NextFunction) {
     try {
-      // Se quiser listar só de um eco, pode usar query param (?eco_id=...)
       const { eco_id } = request.query;
 
-      let sussurros: Sussurro[];
+      let sussurros;
       if (eco_id) {
         sussurros = await knexInstance<Sussurro>('sussurro')
-          .where({ eco_id: eco_id as string })
-          .select('*');
+          .join('register', 'sussurro.user_id', 'register.id')
+          .where('sussurro.eco_id', eco_id as string)
+          .select(
+            'sussurro.id',
+            'sussurro.conteudo',
+            'sussurro.created_at',
+            'register.codinome',
+            'register.avatar_url'
+          );
       } else {
-        sussurros = await knexInstance<Sussurro>('sussurro').select('*');
+        sussurros = await knexInstance<Sussurro>('sussurro')
+          .join('register', 'sussurro.user_id', 'register.id')
+          .select(
+            'sussurro.id',
+            'sussurro.eco_id',
+            'sussurro.conteudo',
+            'sussurro.created_at',
+            'register.codinome',
+            'register.avatar_url'
+          );
       }
 
       return response.json({ sussurros });
@@ -47,6 +62,10 @@ class SussurroController {
       }
 
       const { eco_id, conteudo } = validation.data;
+      if (!request.user) {
+        throw new AppError('Usuário não autenticado.', 401);
+      }
+      const user_id = request.user.id;
 
       // Verifica se o eco existe
       const ecoExists = await knexInstance('eco').where({ id: eco_id }).first();
@@ -54,11 +73,29 @@ class SussurroController {
         throw new AppError('Eco não encontrado.', 404);
       }
 
+      // Verifica se o usuário já comentou neste eco
+      const jaComentou = await knexInstance('sussurro')
+        .where({ eco_id, user_id })
+        .first();
+      if (jaComentou) {
+        throw new AppError('Você já comentou neste eco.', 400);
+      }
+
+      // Limite de 5 sussurros por eco
+      const sussurrosCount = await knexInstance('sussurro')
+        .where({ eco_id })
+        .count<{ count: string }>('id as count')
+        .first();
+      if (Number(sussurrosCount?.count || 0) >= 5) {
+        throw new AppError('Limite de 5 sussurros por eco atingido.', 400);
+      }
+
       // Cria o sussurro
       const [sussurro] = await knexInstance<Sussurro>('sussurro')
         .insert({
           id: crypto.randomUUID(),
           eco_id,
+          user_id,
           conteudo,
         })
         .returning('*');
@@ -75,8 +112,6 @@ class SussurroController {
   async update(request: Request, response: Response, next: NextFunction) {
     try {
       const { id } = request.params;
-
-      // Validação parcial (só campo conteudo pode ser editado)
       const schemaPartial = sussurroSchema.omit({ eco_id: true }).partial();
       const validation = schemaPartial.safeParse(request.body);
       if (!validation.success) {
@@ -84,23 +119,17 @@ class SussurroController {
           validation.error.errors[0]?.message || 'Dados inválidos.';
         throw new AppError(`Erro de validação: ${errorMessage}`, 400);
       }
-
       const updateData = validation.data;
-
-      // Verifica se o sussurro existe
       const sussurroExists = await knexInstance<Sussurro>('sussurro')
         .where({ id })
         .first();
       if (!sussurroExists) {
         throw new AppError('Comentário não encontrado.', 404);
       }
-
-      // Atualiza o sussurro
       const [sussurro] = await knexInstance<Sussurro>('sussurro')
         .where({ id })
         .update(updateData)
         .returning('*');
-
       return response.json({
         message: 'Comentário atualizado com sucesso!',
         sussurro,
@@ -114,17 +143,13 @@ class SussurroController {
   async delete(request: Request, response: Response, next: NextFunction) {
     try {
       const { id } = request.params;
-
-      // Verifica se o sussurro existe
       const sussurroExists = await knexInstance<Sussurro>('sussurro')
         .where({ id })
         .first();
       if (!sussurroExists) {
         throw new AppError('Comentário não encontrado.', 404);
       }
-
       await knexInstance<Sussurro>('sussurro').where({ id }).delete();
-
       return response.json({ message: 'Comentário deletado com sucesso!' });
     } catch (error) {
       next(error);

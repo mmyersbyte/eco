@@ -9,7 +9,9 @@ import { AppError } from '../utils/AppError.ts';
 const ecoSchema = z.object({
   thread_1: z
     .string()
-    .min(1, { message: 'Primeira thread obrigatória.' })
+    .min(100, {
+      message: 'Primeira thread deve ter pelo menos 100 caracteres.',
+    })
     .max(144, { message: 'No máximo 144 caracteres por thread.' }),
   thread_2: z
     .string()
@@ -75,19 +77,32 @@ class EcoController {
           .select(ecoSelect);
       }
 
+      // Para cada eco, busca as tags associadas via join (eco_tags + tags)
       const ecos = await ecosQuery;
 
-      // Para cada eco, busca as tags associadas via join (eco_tags + tags)
-      const ecosWithTags = await Promise.all(
+      // Para cada eco, busca as tags associadas e a contagem de sussurros
+      const ecosWithTagsAndCount = await Promise.all(
         ecos.map(async (eco) => {
           const tags = await knexInstance('eco_tags')
             .join('tags', 'eco_tags.tag_id', 'tags.id')
             .where('eco_tags.eco_id', eco.id)
             .select('tags.id', 'tags.nome');
-          return { ...eco, tags };
+
+          // Conta os sussurros desse eco
+          const countResult = await knexInstance('sussurro')
+            .where('eco_id', eco.id)
+            .count('id as count')
+            .first();
+
+          const sussurros_count = Number(
+            (countResult && countResult.count) || 0
+          );
+
+          return { ...eco, tags, sussurros_count };
         })
       );
-      return response.json({ ecos: ecosWithTags });
+
+      return response.json({ ecos: ecosWithTagsAndCount });
     } catch (error) {
       // Log detalhado do erro para depuração
       const err = error as Error;

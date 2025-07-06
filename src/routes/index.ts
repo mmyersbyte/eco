@@ -19,7 +19,7 @@ routes.use('/auth', authRoutes);
 routes.use('/eco', ecoRoutes);
 routes.use('/sussurro', sussurroRoutes);
 routes.use('/tags', tagRoutes);
-routes.use('/me', profileRoutes);
+routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
 routes.use(rateLimiter);
 routes.use(notFoundHandler);

@@ -4,11 +4,12 @@ import { ensureAuthenticated } from '../middlewares/ensureAuthenticated .ts'; //
 
 const sussurroRoutes = Router();
 const sussurroController = new SussurroController();
+sussurroRoutes.get('/', sussurroController.index);
 
 // Protege a rota de criação de sussurro
+
 sussurroRoutes.use(ensureAuthenticated);
 sussurroRoutes.post('/', sussurroController.create);
-sussurroRoutes.get('/', sussurroController.index);
 sussurroRoutes.patch('/:id', sussurroController.update);
 sussurroRoutes.delete('/:id', sussurroController.delete);
 export { sussurroRoutes };

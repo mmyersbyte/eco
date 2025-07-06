@@ -9,6 +9,12 @@ export async function up(knex: Knex): Promise<void> {
       .references('id')
       .inTable('eco')
       .onDelete('CASCADE'); // FK para eco
+    table
+      .uuid('user_id')
+      .notNullable()
+      .references('id')
+      .inTable('register')
+      .onDelete('CASCADE'); // FK para usuário
     table.string('conteudo', 144).notNullable();
     table.timestamps(true, true); // created_at e updated_at
   });
