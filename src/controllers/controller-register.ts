@@ -1,7 +1,7 @@
 import type { Register } from '@/@types/register.ts';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
 import { authConfig } from '../config/auth.ts';
@@ -84,13 +84,15 @@ class RegisterController {
         .limit(1);
 
       //] Gera o token JWT apenas com o id do usuário
+      const jwtOptions: SignOptions = {
+        expiresIn: Number(authConfig.jwt.expiresIn),
+        subject: String(user.id),
+      };
+
       const token = jwt.sign(
-        {}, // Payload vazio, pois só há um tipo de usuário
-        authConfig.jwt.secret,
-        {
-          subject: user.id, // ID do usuário como subject
-          expiresIn: authConfig.jwt.expiresIn, // Expiração do token
-        }
+        {},
+        String(authConfig.jwt.secret), // Garante que é string
+        jwtOptions
       );
 
       //] Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
