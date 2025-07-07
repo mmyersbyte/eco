@@ -21,14 +21,7 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     client: 'pg',
-    connection: {
-      host: process.env.CONNECTION_HOST,
-      port: Number(process.env.CONNECTION_PORT) || 5432,
-      user: process.env.CONNECTION_USER,
-      password: process.env.CONNECTION_PASSWORD,
-      database: process.env.CONNECTION_DATABASE,
-      ssl: { rejectUnauthorized: false }, // Necessário para Neon!
-    },
+    connection: process.env.DATABASE_URL,
     migrations: {
       directory: './src/database/migrations',
       extension: 'ts',
