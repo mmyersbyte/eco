@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ecodatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '55432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    ports:
+      - '4000:4000'
+    environment:
+      - NODE_ENV=development
+      - CONNECTION_HOST=postgres
+      - CONNECTION_PORT=5432
+      - CONNECTION_USER=postgres
+      - CONNECTION_PASSWORD=admin123
+      - CONNECTION_DATABASE=ecodatabase
+      - JWT_EXPIRES_IN=24h
+      - AUTH_SECRET=minha-chave-super-secreta-para-desenvolvimento-eco-backend-2024
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+
+volumes:
+  postgres_data:

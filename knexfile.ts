@@ -4,7 +4,7 @@ const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'pg',
     connection: {
-      host: 'localhost',
+      host: process.env.CONNECTION_HOST || 'localhost',
       port: 5432,
       user: 'postgres',
       password: 'admin123',
