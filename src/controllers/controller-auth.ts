@@ -3,9 +3,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import type { Register } from '../@types/register.d.ts';
-import { authConfig } from '../config/auth.ts';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { authConfig } from '../config/auth.js';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 class AuthController {
   // Esquema de validação para login

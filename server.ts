@@ -1,4 +1,4 @@
-import app from './src/app.ts';
+import app from './src/app.js';
 
 const PORT = 4000;
 

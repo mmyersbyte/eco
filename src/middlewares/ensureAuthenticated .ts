@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 import jwt from 'jsonwebtoken';
-import { authConfig } from '../config/auth.ts';
-import { AppError } from '../utils/AppError.ts';
+import { authConfig } from '../config/auth.js';
+import { AppError } from '../utils/AppError.js';
 
 function ensureAuthenticated(
   request: Request,

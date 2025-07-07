@@ -1,9 +1,9 @@
-import type { Sussurro } from '@/@types/sussurro.ts';
+import type { Sussurro } from '@/@types/sussurro.js';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 // Validação do sussurro (comentário)
 const sussurroSchema = z.object({

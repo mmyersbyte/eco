@@ -4,9 +4,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { authConfig } from '../config/auth.ts';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { authConfig } from '../config/auth.js';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 // Esquema de validação para registro
 const registerSchema = z.object({

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 class TagController {
   // Listar todas as tags

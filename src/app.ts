@@ -4,8 +4,8 @@ dotenv.config();
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import { errorHandling } from '../src/middlewares/errorHandling.ts';
-import { routes } from '../src/routes/index.ts';
+import { errorHandling } from '../src/middlewares/errorHandling.js';
+import { routes } from '../src/routes/index.js';
 const app = express();
 
 app.use(

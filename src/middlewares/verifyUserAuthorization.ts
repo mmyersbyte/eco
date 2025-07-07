@@ -1,6 +1,6 @@
 // Middleware para verificar se o usuário está autenticado
 import { NextFunction, Request, Response } from 'express';
-import { AppError } from '../utils/AppError.ts';
+import { AppError } from '../utils/AppError.js';
 
 function verifyUserAuthorization() {
   return (request: Request, response: Response, next: NextFunction) => {
