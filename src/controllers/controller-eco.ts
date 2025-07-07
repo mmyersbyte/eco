@@ -86,7 +86,18 @@ class EcoController {
             .join('tags', 'eco_tags.tag_id', 'tags.id')
             .where('eco_tags.eco_id', eco.id)
             .select('tags.id', 'tags.nome');
-          return { ...eco, tags };
+
+          // Busca a contagem de sussurros para este eco
+          const countResult = await knexInstance('sussurro')
+            .where('eco_id', eco.id)
+            .count('id as count')
+            .first();
+
+          const sussurros_count = Number(
+            (countResult && countResult.count) || 0
+          );
+
+          return { ...eco, tags, sussurros_count };
         })
       );
       return response.json({ ecos: ecosWithTags });

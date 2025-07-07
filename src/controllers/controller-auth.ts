@@ -77,6 +77,7 @@ class AuthController {
     }
   }
 
+  //debug, removido em produção
   async index(request: Request, response: Response, next: NextFunction) {
     try {
       const users = await knexInstance<Register>('register').select('*');

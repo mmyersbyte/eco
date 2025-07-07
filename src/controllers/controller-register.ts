@@ -27,6 +27,7 @@ const registerSchema = z.object({
   avatar_url: z.string().url({ message: 'URL do avatar inválida.' }),
 });
 
+//debug, removido em produção
 class RegisterController {
   async index(request: Request, response: Response, next: NextFunction) {
     try {
@@ -37,13 +38,6 @@ class RegisterController {
     }
   }
 
-  /**
-   * Cria um novo usuário, retorna dados públicos e token JWT.
-   * @param request - Request Express
-   * @param response - Response Express
-   * @param next - NextFunction Express
-   * @returns { user, token } se sucesso
-   */
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       // Validação dos dados recebidos

@@ -11,7 +11,7 @@ function randomEmail() {
 
 // Função utilitária para gerar um codinome único a cada execução
 function randomCodinome() {
-  return `TestUser_${randomUUID()}`;
+  return `TestUser_${randomUUID().slice(0, 8)}`;
 }
 
 // Testes para a API de autenticação (registro de usuário)

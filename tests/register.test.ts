@@ -11,7 +11,7 @@ function randomEmail() {
 
 // Função utilitária para gerar um codinome único a cada execução
 function randomCodinome() {
-  return `TestUser_${randomUUID()}`;
+  return `TestUser_${randomUUID().slice(0, 8)}`;
 }
 
 // Testes para a API de registro de usuário
@@ -38,6 +38,10 @@ describe('Register API', () => {
 
     // Faz a requisição de cadastro
     const response = await request(app).post('/register').send(newUser);
+
+    // DEBUG: Vamos ver o que está acontecendo
+    console.log('Response status:', response.status);
+    console.log('Response body:', response.body);
 
     // Espera status 201 (criado)
     expect(response.status).toBe(201);

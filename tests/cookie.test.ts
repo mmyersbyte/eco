@@ -11,7 +11,7 @@ function randomEmail() {
 
 // Função utilitária para gerar um codinome único
 function randomCodinome() {
-  return `TestUser_${randomUUID()}`;
+  return `TestUser_${randomUUID().slice(0, 8)}`;
 }
 
 describe('Auth Cookie', () => {
