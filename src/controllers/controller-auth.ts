@@ -80,16 +80,6 @@ class AuthController {
       next(error);
     }
   }
-
-  //debug, removido em produção
-  async index(request: Request, response: Response, next: NextFunction) {
-    try {
-      const users = await knexInstance<Register>('register').select('*');
-      return response.status(200).json(users);
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export { AuthController };

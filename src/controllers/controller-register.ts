@@ -27,17 +27,7 @@ const registerSchema = z.object({
   avatar_url: z.string().url({ message: 'URL do avatar inválida.' }),
 });
 
-//debug, removido em produção
 class RegisterController {
-  async index(request: Request, response: Response, next: NextFunction) {
-    try {
-      const users = await knexInstance<Register>('register').select('*');
-      return response.json({ message: 'Usuários encontrados.', users });
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       // Validação dos dados recebidos

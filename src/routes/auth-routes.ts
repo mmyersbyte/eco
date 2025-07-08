@@ -6,6 +6,5 @@ const authController = new AuthController();
 
 // POST /login
 authRoutes.post('/', authController.auth);
-authRoutes.get('/', authController.index);
 
 export { authRoutes };
