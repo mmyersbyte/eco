@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EcoController } from '../controllers/controller-eco.js';
-import { ensureAuthenticated } from '../middlewares/ensureAuthenticated .js'; //] Middleware para proteger rotas
+import { ensureAuthenticated } from '../middlewares/ensureAuthenticated.js'; //] Middleware para proteger rotas
 
 const ecoRoutes = Router();
 const ecoController = new EcoController();
