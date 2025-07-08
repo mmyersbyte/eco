@@ -5,6 +5,5 @@ const tagRoutes = Router();
 const tagController = new TagController();
 
 tagRoutes.get('/', tagController.index);
-tagRoutes.post('/', tagController.create);
 
 export { tagRoutes };
