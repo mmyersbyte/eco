@@ -10,13 +10,19 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      'https://ecostories-9rc4.vercel.app',
-      'http://ecohistorias.com.br',
-      'https://ecohistorias.com.br',
-      'https://www.ecohistorias.com.br',
-    ],
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        /^https:\/\/(www\.)?ecohistorias\.com\.br$/, // frontend com e sem www
+        /^https:\/\/api\.ecohistorias\.com\.br$/, // backend/api
+      ];
+      if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
