@@ -10,7 +10,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: ['https://ecostories-9rc4.vercel.app/'],
+    origin: [
+      'https://ecostories-9rc4.vercel.app',
+      'http://ecohistorias.com.br',
+      'https://ecohistorias.com.br',
+      'https://www.ecohistorias.com.br',
+    ],
     credentials: true,
   })
 );

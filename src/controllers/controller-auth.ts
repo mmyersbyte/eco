@@ -58,7 +58,11 @@ class AuthController {
         .cookie('token', token, {
           httpOnly: true, // Só servidor acessa
           secure: process.env.NODE_ENV === 'production', // HTTPS em prod
-          sameSite: 'lax', // Proteção CSRF
+          sameSite: 'lax', // Funciona para mesmo domínio
+          domain:
+            process.env.NODE_ENV === 'production'
+              ? '.ecohistorias.com.br'
+              : undefined, // Compartilha entre subdomínios
           maxAge: 24 * 60 * 60 * 1000, // 24 horas
           path: '/', // importante: deve ser igual ao path do cookie JWT
         })
