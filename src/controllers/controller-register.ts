@@ -85,15 +85,11 @@ class RegisterController {
 
       //] Gera o token JWT apenas com o id do usuário
       const jwtOptions: SignOptions = {
-        expiresIn: Number(authConfig.jwt.expiresIn),
+        expiresIn: authConfig.jwt.expiresIn as unknown as string,
         subject: String(user.id),
       };
 
-      const token = jwt.sign(
-        {},
-        String(authConfig.jwt.secret), // Garante que é string
-        jwtOptions
-      );
+      const token = jwt.sign({}, String(authConfig.jwt.secret), jwtOptions);
 
       //] Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
       return response

@@ -49,7 +49,7 @@ class AuthController {
         String(authConfig.jwt.secret),
         {
           subject: String(user.id), // ID do usuário como subject
-          expiresIn: Number(authConfig.jwt.expiresIn), // Expiração do token
+          expiresIn: authConfig.jwt.expiresIn as unknown as string, // Corrigido: cast para string
         }
       );
 
