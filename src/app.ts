@@ -10,10 +10,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: ['https://ecostories-9rc4.vercel.app/'],
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(routes);
