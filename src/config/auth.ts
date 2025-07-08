@@ -3,7 +3,7 @@ dotenv.config();
 export const authConfig = {
   jwt: {
     secret: String(process.env.AUTH_SECRET || 'default'),
-    expiresIn: '1d',
+    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     path: '/',
   },
 };
