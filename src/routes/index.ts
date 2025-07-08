@@ -27,7 +27,7 @@ routes.use('/sussurro', sussurroRoutes);
 routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
 routes.use('/tag', tagRoutes);
-routes.use('/docs', swaggerRoutes);
+routes.use(swaggerRoutes);
 
 routes.use(rateLimiter);
 routes.use(notFoundHandler);
