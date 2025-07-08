@@ -26,7 +26,7 @@ routes.use('/eco', ecoRoutes);
 routes.use('/sussurro', sussurroRoutes);
 routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
-routes.use('/tag', tagRoutes);
+routes.use('/tags', tagRoutes);
 routes.use(swaggerRoutes);
 
 routes.use(rateLimiter);
