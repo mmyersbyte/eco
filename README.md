@@ -1,202 +1,87 @@
-# Eco Backend
+<h1 align="center">
+Eco Histórias
 
-API Backend para o aplicativo Eco - Uma plataforma minimalista para compartilhamento de histórias pessoais com foco em sensibilidade, privacidade e intencionalidade.
+</h1>
+<p align="center">
+  <img src="assets/iconMask.png" alt="Mascara" width="250"/>
+</p>
+<div align="center">
+  <!-- Linha 1 -->
+  <img src="https://img.shields.io/badge/TYPESCRIPT-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TYPESCRIPT">
+  <img src="https://img.shields.io/badge/NODE-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="NODE">
+  <img src="https://img.shields.io/badge/EXPRESS-%20-FF6F61?style=for-the-badge&logo=express&logoColor=white&label=EXPRESS&labelColor=FF6F61" alt="EXPRESS">
 
-## 🎯 Sobre o Projeto
+  <br>
+  <!-- Linha 2 -->
+  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/-Knex-D26B38?style=for-the-badge&logo=knexdotjs&logoColor=white" alt="Knex">
 
-O Eco é uma aplicação backend que oferece:
+  <br>
+  <!-- Linha 3 -->
+  <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+  <img src="https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose">
+  <p align="center">
+  <a href="https://www.labemunisul.com.br/swagger.html">
+    <img src="https://img.shields.io/badge/SWAGGER-DOCS-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="SWAGGER">
+  </a>
+  <a href="./EnglishREADME.md">
+    <img src="https://img.shields.io/badge/README-EN-blue?style=for-the-badge" alt="README EN">
+  </a>
+</p>
+</div>
 
-- **Autenticação JWT** com email/senha
-- **Sistema de Codinomes Psicodélicos** - Geração automática de nomes únicos
-- **Publicação de Ecos** - Histórias pessoais com até 3 threads
-- **Sistema de Tags** - Categorização sensível por temas
-- **Sussurros** - Comentários limitados (máximo 10 por eco)
-- **Privacidade Radical** - Nenhum dado pessoal exposto publicamente
 
-## 🚀 Tecnologias
+<h2>Objetivo do Projeto</h2> 
+<p> 
+O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para compartilhamento anônimo de histórias, priorizando privacidade, conforto emocional e navegação simples. O anonimato é garantido por codinomes e avatares fixos, sem nomes ou perfis personalizáveis, com autenticação via e-mail apenas para moderação básica, sem qualquer integração externa. Cada publicação (“Eco”) possui comentários limitados e é categorizada por tags sensíveis, evitando gamificação e exposição excessiva. A arquitetura utiliza React Native e React no frontend (repositórios privados devido ao foco em backend), enquanto a API é construída com Node.js, Express e PostgreSQL, com armazenamento de avatares em AWS S3 e deploy automatizado via Docker. Todo o desenvolvimento segue princípios de segurança, modularidade e respeito à privacidade, com documentação clara no Swagger, testes automatizados via Vitest e uso de Knex Query Builder. O projeto é backend focus e não citarei o desenvolvimento front-end ao decorrer. 
+</p>
 
-- **Node.js** com TypeScript
-- **Express.js** - Framework web
-- **PostgreSQL** - Banco de dados
-- **Knex.js** - Query builder e migrations
-- **JWT** - Autenticação
-- **Zod** - Validação de dados
-- **Bcrypt** - Hash de senhas
-- **Helmet** - Segurança
-- **Rate Limiting** - Proteção contra abuso
 
-## 📦 Instalação
+<hr/>
 
-```bash
-# Instalar dependências
-npm install
+<h2>Docs</h2>
+<img src="assets/swaggerEco.png" alt="Swagger da API" style="max-width: 500px; width: 100%; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 16px;" />
+<p>
+  Acesse a documentação Swagger em:<br>
+  <a href="https://api.ecohistorias.com.br/docs/" target="_blank">https://api.ecohistorias.com.br/docs/</a>
+</p>
+<p>
+  <strong>Observação:</strong> As rotas para listar usuários e publicar Ecos foram removidas da branch de produção! Elas foram utilizadas apenas para debug e testes. Não estão documentadas no Swagger por não serem oficiais, mas ainda permanecem disponíveis na branch de desenvolvimento (<code>main</code>).
+</p>
 
-# Configurar variáveis de ambiente
-cp .env.example .env
 
-# Executar migrations
-npm run knex migrate:latest
+<h2>Autenticação e Segurança</h2> 
+<p> A autenticação <code>JWT</code> utiliza <strong>cookies httpOnly</strong> para armazenar o token de sessão, aumentando a segurança contra ataques XSS. O backend faz uso do middleware <code>cookie-parser</code> para leitura dos cookies em rotas protegidas, enquanto o frontend foi adaptado para não manipular tokens diretamente, empregando <code>credentials: 'include'</code> em todas as requisições autenticadas. Variáveis sensíveis são gerenciadas via <code>dotenv</code> e as senhas são sempre armazenadas de forma hasheada com <code>bcrypt</code>. <code>CORS</code> é habilitado para integração frontend/backend com controle de origem.</p> <p> Adicionalmente, a API utiliza <code>helmet</code> para reforçar os headers de segurança HTTP, <code>rate limiting</code> para limitar requisições e evitar abusos/brute force, e <code>zod</code> para validação robusta dos dados de entrada em todas as rotas públicas e protegidas. </p>
 
-# Executar seeds (opcional)
-npm run knex seed:run
+<img src="assets/corsEco.png" alt="Configuração CORS segura no backend" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
 
-# Iniciar servidor de desenvolvimento
-npm run dev
-```
+<h2>Database</h2> 
+<p> O banco de dados do projeto é estruturado em <code>PostgreSQL</code>, com modelagem relacional. O acesso ao banco e a construção de queries utilizam o <code>Knex Query Builder</code>, o que facilita a manutenção, migrações e padronização das operações SQL. Durante o desenvolvimento, utilizei o <code>pgAdmin</code> para gerenciamento local, mas, na branch de produção, optei pelo <strong>Neon</strong> como solução de PostgreSQL em nuvem, garantindo alta disponibilidade, backups automáticos e integração eficiente com o backend.</p>
+<img src="assets/schemasEco.png" alt="Configuração CORS segura no backend" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
 
-## 🔧 Configuração
 
-Crie um arquivo `.env` com as seguintes variáveis:
+<h2>Testes</h2> 
+<p>Os testes automatizados da API são implementados com <code>Vitest</code>, proporcionando cobertura eficiente de rotas, serviços e middlewares, com execução rápida e integração ao fluxo de desenvolvimento. Todo o backend é desenvolvido em <code>TypeScript</code>, garantindo tipagem estática, melhor organização do código e redução de bugs durante o desenvolvimento e manutenção da aplicação.
+</p>
 
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/eco
-JWT_SECRET=your-super-secret-jwt-key
-PORT=3000
-```
+<h2>Docker</h2>
+O projeto utiliza <code>Docker Compose</code> para orquestrar todos os serviços essenciais, facilitando a configuração e execução do ambiente local com apenas um comando. O banco de dados PostgreSQL, backend, scripts de migrations e seeds, variáveis de ambiente e documentação Swagger já vêm pré-configurados, agilizando o setup para desenvolvimento e testes. O uso de containers também simplifica o deploy contínuo na plataforma Render, garantindo ambientes reprodutíveis e escaláveis.
 
-## 📚 Endpoints da API
+<h2> Como rodar a branch de desenvolvimento localmente com Docker Compose</h2>
+<p>
+  <strong>Pré-requisitos:</strong><br>
+  - Docker Compose instalado<br>
+  - git clone main
+</p>
+<p>
+  <strong>Passo único:</strong><br>
+  <code>docker compose up --build</code>
+</p>
+<p>
+  <strong>Acessar aplicação:</strong><br>
+  API: <a href="http://localhost:4000" target="_blank">http://localhost:4000</a><br>
+  Swagger: <a href="http://localhost:4000/docs" target="_blank">http://localhost:4000/docs</a>
+</p>
 
-### Autenticação
 
-- `POST /register` - Registro de usuário
-- `POST /login` - Login de usuário
 
-### Ecos
-
-- `GET /eco` - Listar ecos (com filtro por tag opcional)
-- `POST /eco` - Criar novo eco (autenticado)
-- `GET /eco/:id` - Visualizar eco específico
-- `PUT /eco/:id` - Atualizar eco (autenticado)
-- `DELETE /eco/:id` - Deletar eco (autenticado)
-
-### Tags
-
-- `GET /tags` - Listar todas as tags
-- `POST /tags` - Criar nova tag (admin)
-
-### Sussurros
-
-- `GET /sussurro` - Listar sussurros
-- `POST /sussurro` - Criar sussurro (autenticado)
-- `PUT /sussurro/:id` - Atualizar sussurro (autenticado)
-- `DELETE /sussurro/:id` - Deletar sussurro (autenticado)
-
-## 🧪 Testes
-
-```bash
-# Executar testes
-npm test
-
-# Executar testes em modo watch
-npm run test:watch
-```
-
-## 📁 Estrutura do Projeto
-
-```
-src/
-├── @types/           # Definições de tipos TypeScript
-├── config/           # Configurações (JWT, etc.)
-├── controllers/      # Controladores da API
-├── database/         # Configuração do banco e migrations
-├── middlewares/      # Middlewares customizados
-├── routes/           # Definição das rotas
-└── utils/            # Utilitários e helpers
-
-tests/                # Testes da aplicação
-```
-
-## 🔐 Segurança
-
-- **Rate Limiting** - 100 requisições por IP a cada 15 minutos
-- **Helmet** - Headers de segurança
-- **JWT** - Autenticação stateless
-- **Bcrypt** - Hash seguro de senhas
-- **Validação Zod** - Validação rigorosa de dados
-
-## 🌱 Filosofia do Projeto
-
-O Eco prioriza:
-
-- **Anonimato** - Codinomes gerados automaticamente
-- **Privacidade** - Nenhum dado pessoal exposto
-- **Sensibilidade** - Ambiente seguro para expressão
-- **Intencionalidade** - Interações limitadas e significativas
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
---- docker
-
-## 🐳 Executar com Docker
-
-### Pré-requisitos
-
-- Docker
-- Docker Compose
-
-### Executar aplicação completa
-
-```bash
-# Clonar repositório
-git clone <seu-repo>
-cd eco
-
-# Iniciar aplicação (backend + banco)
-docker compose up --build
-
-# Acessar aplicação
-# API: http://localhost:4000
-# Swagger: http://localhost:4000/docs
-```
-
-### Parar aplicação
-
-```bash
-docker-compose down
-```
-
-### Limpar tudo (incluindo dados do banco)
-
-```bash
-docker-compose down -v
-```
-
-```
-
-## 🎯 Benefícios para o recrutador:
-
-### ✅ **Antes (complicado)**:
-1. Instalar Node.js 18
-2. Instalar PostgreSQL
-3. Configurar banco de dados
-4. Instalar dependências
-5. Rodar migrations
-6. Configurar variáveis de ambiente
-7. Iniciar aplicação
-
-### ✅ **Depois (simples)**:
-1. `docker-compose up --build`
-2. ✨ **Aplicação rodando!**
-
-## 🔧 Funcionalidades incluídas:
-
-- ✅ **PostgreSQL** configurado automaticamente
-- ✅ **Migrations** executadas na inicialização
-- ✅ **Seeds** executados automaticamente
-- ✅ **Variáveis de ambiente** pré-configuradas
-- ✅ **Swagger** disponível em `/docs`
-- ✅ **Hot reload** para desenvolvimento
-- ✅ **Logs** centralizados
-- ✅ **Cleanup** automático
-
-## 📝 Próximos passos:
-
-1. **Criar os arquivos** que listei acima
-2. **Testar localmente** com `docker-compose up --build`
-3. **Atualizar README.md** com instruções Docker
-4. **Commit e push** para o repositório
-
-Quer que eu **implemente esses arquivos** para você? É só confirmar e eu crio todos de uma vez! 🚀
-```
