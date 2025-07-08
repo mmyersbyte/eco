@@ -2,8 +2,8 @@ import type { Eco } from '@/@types/eco.ts';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 // Schema Zod para criação de eco (recebe array de tag_ids, não mais nomes)
 const ecoSchema = z.object({

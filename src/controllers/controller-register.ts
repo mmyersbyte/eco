@@ -1,12 +1,12 @@
 import type { Register } from '@/@types/register.ts';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { authConfig } from '../config/auth.ts';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { authConfig } from '../config/auth.js';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 // Esquema de validação para registro
 const registerSchema = z.object({
@@ -84,14 +84,12 @@ class RegisterController {
         .limit(1);
 
       //] Gera o token JWT apenas com o id do usuário
-      const token = jwt.sign(
-        {}, // Payload vazio, pois só há um tipo de usuário
-        authConfig.jwt.secret,
-        {
-          subject: user.id, // ID do usuário como subject
-          expiresIn: authConfig.jwt.expiresIn, // Expiração do token
-        }
-      );
+      const jwtOptions: SignOptions = {
+        expiresIn: authConfig.jwt.expiresIn as unknown as string,
+        subject: String(user.id),
+      };
+
+      const token = jwt.sign({}, String(authConfig.jwt.secret), jwtOptions);
 
       //] Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
       return response

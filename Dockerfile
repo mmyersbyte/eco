@@ -1,28 +1,30 @@
-## Usei a imagem oficial do Node.js e a que usei no projeto.
 FROM node:18-alpine
- 
-## Diretório de trabalho
+
 WORKDIR /app
 
-# Install
-RUN apk add --no-cache postgresql-client
-
-# Copiar arquivos de dependências
+# Copia apenas os arquivos de dependências
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci
+# Instala todas as dependências (incluindo dev, necessário para build)
+RUN npm install
 
-# Copiar código fonte
+# Copia o restante do código fonte
 COPY . .
 
-# Copiar script de inicialização
+# Compila o TypeScript para JavaScript
+RUN npm run build
+
+# (Opcional) Torna o entrypoint executável, se for usar migrations automáticas
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Expor porta
 EXPOSE 4000
 
-# Usar script de inicialização
+# Se quiser rodar migrations/seeds automaticamente, mantenha o entrypoint:
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Se NÃO quiser rodar migrations automáticas, comente a linha acima e descomente a de baixo:
+# CMD ["npm", "start"]
+
+# O comando padrão para iniciar a aplicação
 CMD ["npm", "start"]

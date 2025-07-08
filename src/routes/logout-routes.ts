@@ -6,7 +6,7 @@ const logoutRoutes = Router();
 logoutRoutes.post('/', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/', // importante: deve ser igual ao path do cookie JWT
   });

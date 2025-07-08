@@ -3,9 +3,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import type { Register } from '../@types/register.d.ts';
-import { authConfig } from '../config/auth.ts';
-import { knexInstance } from '../database/knex.ts';
-import { AppError } from '../utils/AppError.ts';
+import { authConfig } from '../config/auth.js';
+import { knexInstance } from '../database/knex.js';
+import { AppError } from '../utils/AppError.js';
 
 class AuthController {
   // Esquema de validação para login
@@ -46,10 +46,10 @@ class AuthController {
       // Gera o token JWT apenas com o id do usuário
       const token = jwt.sign(
         {}, // Payload vazio, pois só há um tipo de usuário
-        authConfig.jwt.secret,
+        String(authConfig.jwt.secret),
         {
-          subject: user.id, // ID do usuário como subject
-          expiresIn: authConfig.jwt.expiresIn, // Expiração do token
+          subject: String(user.id), // ID do usuário como subject
+          expiresIn: authConfig.jwt.expiresIn as unknown as string, // Corrigido: cast para string
         }
       );
 

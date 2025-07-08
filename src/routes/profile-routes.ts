@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { ensureAuthenticated } from '../middlewares/ensureAuthenticated .ts';
-import { knexInstance } from '../database/knex.ts';
+import { knexInstance } from '../database/knex.js';
+import { ensureAuthenticated } from '../middlewares/ensureAuthenticated.js';
 
 const profileRoutes = Router();
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { SussurroController } from '../controllers/controller-sussurro.ts';
-import { ensureAuthenticated } from '../middlewares/ensureAuthenticated .ts'; //] Middleware para proteger rotas
+import { SussurroController } from '../controllers/controller-sussurro.js';
+import { ensureAuthenticated } from '../middlewares/ensureAuthenticated.js'; //] Middleware para proteger rotas
 
 const sussurroRoutes = Router();
 const sussurroController = new SussurroController();

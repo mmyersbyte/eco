@@ -19,6 +19,14 @@ const config: { [key: string]: Knex.Config } = {
       extension: 'ts',
     },
   },
+  production: {
+    client: 'pg',
+    connection: process.env.DATABASE_URL,
+    migrations: {
+      directory: './src/database/migrations',
+      extension: 'ts',
+    },
+  },
 };
 
 export default config;
