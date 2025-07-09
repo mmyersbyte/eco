@@ -20,8 +20,10 @@ Eco Histórias
   <!-- Linha 3 -->
   <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
   <img src="https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose">
+<img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3">
+
   <p align="center">
-  <a href="https://www.labemunisul.com.br/swagger.html">
+  <a href="https://api.ecohistorias.com.br/docs/">
     <img src="https://img.shields.io/badge/SWAGGER-DOCS-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="SWAGGER">
   </a>
   <a href="./EnglishREADME.md">
