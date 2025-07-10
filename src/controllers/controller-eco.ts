@@ -20,7 +20,7 @@ const ecoSchema = z.object({
     .or(z.literal('')),
   thread_3: z
     .string()
-    .max(144, { message: 'No máximo 144 caracteres por thread.' })
+    .max(244, { message: 'No máximo 244 caracteres na última thread.' })
     .optional()
     .or(z.literal('')),
   tag_ids: z
@@ -33,7 +33,7 @@ const ecoSchema = z.object({
 const ecoUpdateSchema = z.object({
   thread_1: z.string().max(144).optional(),
   thread_2: z.string().max(144).optional(),
-  thread_3: z.string().max(144).optional(),
+  thread_3: z.string().max(244).optional(),
 });
 
 class EcoController {

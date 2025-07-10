@@ -13,7 +13,7 @@ healthRoutes.get('/', (req, res) => {
     Connection: 'keep-alive',
   });
 
-  // Resposta ultra-rápida
+  // Resposta 
   res.status(200).json({
     status: 'OK',
     timestamp: Date.now(), // Timestamp simples para ping tracking
