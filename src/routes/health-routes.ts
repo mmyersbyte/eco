@@ -13,7 +13,7 @@ healthRoutes.get('/', (req, res) => {
     Connection: 'keep-alive',
   });
 
-  // Resposta 
+  // Resposta
   res.status(200).json({
     status: 'OK',
     timestamp: Date.now(), // Timestamp simples para ping tracking
@@ -21,3 +21,5 @@ healthRoutes.get('/', (req, res) => {
 });
 
 export { healthRoutes };
+
+// Endpoint de health check - otimizado para Render (anti-sleep)

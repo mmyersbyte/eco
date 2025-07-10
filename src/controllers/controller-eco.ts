@@ -33,7 +33,7 @@ const ecoSchema = z.object({
 const ecoUpdateSchema = z.object({
   thread_1: z.string().max(144).optional(),
   thread_2: z.string().max(144).optional(),
-  thread_3: z.string().max(244).optional(),
+  thread_3: z.string().max(244).optional(), // Aumentei o limite para 244 caracteres
 });
 
 class EcoController {

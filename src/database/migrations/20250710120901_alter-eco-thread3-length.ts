@@ -11,3 +11,5 @@ export async function down(knex: Knex): Promise<void> {
     table.string('thread_3', 144).alter(); // Reverte para 144 caracteres
   });
 }
+
+// Aumenta o limite da thread_3 para 244 caracteres
