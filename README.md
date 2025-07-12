@@ -1,10 +1,12 @@
 <h1 align="center">
 Eco Histórias
-
 </h1>
-<p align="center">
-  <img src="assets/maskIcon.png" alt="Mascara" width="250"/>
-</p>
+
+<p align="center"><em>Vozes sem Ego.</em></p>
+
+
+
+
 <div align="center">
   <!-- Linha 1 -->
   <img src="https://img.shields.io/badge/TYPESCRIPT-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TYPESCRIPT">
@@ -31,6 +33,10 @@ Eco Histórias
   </a>
 </p>
 </div>
+<p align="center">
+  <img src="./assets/202507082229.gif" alt="Demonstração do Eco" />
+</p>
+
 
 
 <h2>Objetivo do Projeto</h2> 
