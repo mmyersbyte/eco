@@ -2,6 +2,7 @@
 Eco Histórias
 </h1>
 
+
 <p align="center"><em>Vozes sem Ego.</em></p>
 
 <div align="center">
@@ -33,7 +34,7 @@ Eco Histórias
 <p align="center">
   <img src="./assets/202507082229.gif" alt="Demonstração do Eco" />
 </p>
-
+<span>Esta é a branch de desenvolvimento. Alterações como 'Esqueci a Senha', Swagger atualizado e novas funcionalidades estão na branch de produção.</span>
 <h2>Objetivo do Projeto</h2> 
 <p> 
 O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para compartilhamento anônimo de histórias, priorizando privacidade, conforto emocional e navegação simples. O anonimato é garantido por codinomes e avatares fixos, sem nomes ou perfis personalizáveis, com autenticação via e-mail apenas para moderação básica, sem qualquer integração externa. Cada publicação (“Eco”) possui comentários limitados e é categorizada por tags sensíveis, evitando gamificação e exposição excessiva. A arquitetura utiliza React Native e React no frontend (repositórios privados devido ao foco em backend), enquanto a API é construída com Node.js, Express e PostgreSQL, com armazenamento de avatares em AWS S3 e deploy automatizado via Docker. Todo o desenvolvimento segue princípios de segurança, modularidade e respeito à privacidade, com documentação clara no Swagger, testes automatizados via Vitest e uso de Knex Query Builder. O projeto é backend focus e não citarei o desenvolvimento front-end ao decorrer. 
@@ -133,6 +134,7 @@ eco/
 │   │   ├── controller-auth.ts
 │   │   ├── controller-eco.ts
 │   │   ├── controller-register.ts
+|   |   |-- controller-password-reset.ts
 │   │   ├── controller-sussurro.ts
 │   │   └── controller-tag.ts
 │   ├── database/
@@ -142,10 +144,6 @@ eco/
 │   │   │   ├── 20250622001613_create-sussuro.ts
 │   │   │   ├── 20250623093355_create-tags.ts
 │   │   │   └── 20250623093554_create-eco_tags.ts
-│   │   ├── seeds/
-│   │   │   ├── 001_tags.ts
-│   │   │   ├── 002_users.ts
-│   │   │   └── 003_ecos.ts
 │   │   └── knex.ts
 │   ├── middlewares/
 │   │   ├── ensureAuthenticated.ts
@@ -153,8 +151,6 @@ eco/
 │   │   ├── notFoundHandler.ts
 │   │   ├── rateLimiter.ts
 │   │   └── verifyUserAuthorization.ts
-│   ├── notas/
-│   │   └── JWT_IMPLEMENTACAO.md
 │   ├── routes/
 │   │   ├── auth-routes.ts
 │   │   ├── eco-routes.ts
@@ -162,12 +158,14 @@ eco/
 │   │   ├── index.ts
 │   │   ├── logout-routes.ts
 │   │   ├── profile-routes.ts
+|   |   ├── password-reset-routes.ts
 │   │   ├── register-routes.ts
 │   │   ├── sussurro-eco.ts
 │   │   ├── swagger-routes.ts
 │   │   └── tag-routes.ts
 │   ├── utils/
 │   │   └── AppError.ts
+|   |   └── emailService.ts
 │   └── app.ts
 ├── tests/
 │   ├── auth.test.ts
