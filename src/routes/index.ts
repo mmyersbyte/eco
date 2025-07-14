@@ -6,6 +6,7 @@ import { authRoutes } from './auth-routes.js';
 import { ecoRoutes } from './eco-routes.js';
 import { healthRoutes } from './health-routes.js';
 import { logoutRoutes } from './logout-routes.js';
+import { passwordResetRoutes } from './password-reset-routes.js';
 import { profileRoutes } from './profile-routes.js';
 import { registerRoutes } from './register-routes.js';
 import { sussurroRoutes } from './sussurro-eco.js';
@@ -27,6 +28,7 @@ routes.use('/sussurro', sussurroRoutes);
 routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
 routes.use('/tags', tagRoutes);
+routes.use('/password', passwordResetRoutes);
 routes.use(swaggerRoutes);
 
 routes.use(rateLimiter);
