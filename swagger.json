@@ -446,6 +446,80 @@
           "401": { "description": "Não autenticado" }
         }
       }
+    },
+    "/password/forgot-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Solicitar reset de senha",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                },
+                "required": ["email"]
+              },
+              "example": { "email": "usuario@exemplo.com" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Se o e-mail existir, enviaremos instruções para redefinir a senha."
+          },
+          "429": { "description": "Limite de tentativas atingido" }
+        }
+      }
+    },
+    "/password/reset-password/{token}": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Validar token de reset de senha",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Token válido" },
+          "400": { "description": "Token inválido ou expirado" }
+        }
+      }
+    },
+    "/password/reset-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Redefinir senha usando token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                },
+                "required": ["token", "newPassword"]
+              },
+              "example": {
+                "token": "5adbf9e54033dc3b7a7f198f900c8ba36d05312002fd8ffbd331935916d019df",
+                "newPassword": "novaSenha123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Senha redefinida com sucesso!" },
+          "400": { "description": "Token inválido ou expirado" }
+        }
+      }
     }
   }
 }

@@ -1,10 +1,9 @@
 <h1 align="center">
 Eco Histórias
-
 </h1>
-<p align="center">
-  <img src="assets/maskIcon.png" alt="Mascara" width="250"/>
-</p>
+
+<p align="center"><em>Vozes sem Ego.</em></p>
+
 <div align="center">
   <!-- Linha 1 -->
   <img src="https://img.shields.io/badge/TYPESCRIPT-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TYPESCRIPT">
@@ -31,6 +30,9 @@ Eco Histórias
   </a>
 </p>
 </div>
+<p align="center">
+  <img src="./assets/202507082229.gif" alt="Demonstração do Eco" />
+</p>
 
 <h2>Objetivo do Projeto</h2> 
 <p> 
@@ -54,7 +56,12 @@ O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para
 </p>
 
 <h2>Autenticação e Segurança</h2> 
-<p> A autenticação <code>JWT</code> utiliza <strong>cookies httpOnly</strong> para armazenar o token de sessão, aumentando a segurança contra ataques XSS. O backend faz uso do middleware <code>cookie-parser</code> para leitura dos cookies em rotas protegidas, enquanto o frontend foi adaptado para não manipular tokens diretamente, empregando <code>credentials: 'include'</code> em todas as requisições autenticadas. Variáveis sensíveis são gerenciadas via <code>dotenv</code> e as senhas são sempre armazenadas de forma hasheada com <code>bcrypt</code>. <code>CORS</code> é habilitado para integração frontend/backend com controle de origem.</p> <p> Adicionalmente, a API utiliza <code>helmet</code> para reforçar os headers de segurança HTTP, <code>rate limiting</code> para limitar requisições e evitar abusos/brute force, e <code>zod</code> para validação robusta dos dados de entrada em todas as rotas públicas e protegidas. </p>
+<p> A autenticação <code>JWT</code> utiliza <strong>cookies httpOnly</strong> para armazenar o token de sessão, aumentando a segurança contra ataques XSS. O backend faz uso do middleware <code>cookie-parser</code> para leitura dos cookies em rotas protegidas, enquanto o frontend foi adaptado para não manipular tokens diretamente, empregando <code>credentials: 'include'</code> em todas as requisições autenticadas. Variáveis sensíveis são gerenciadas via <code>dotenv</code> e as senhas são sempre armazenadas de forma hasheada com <code>bcrypt</code>. <code>CORS</code> é habilitado para integração frontend/backend com controle de origem.</p> 
+<p> Adicionalmente, a API utiliza <code>helmet</code> para reforçar os headers de segurança HTTP, <code>rate limiting</code> para limitar requisições e evitar abusos/brute force, e <code>zod</code> para validação robusta dos dados de entrada em todas as rotas públicas e protegidas. </p>
+
+<p>
+  <strong>Recuperação de Senha:</strong> O backend implementa um fluxo seguro de "esqueci minha senha", onde o usuário recebe um e-mail com um link temporário para redefinir sua senha. O envio é feito via <code>Nodemailer</code> integrado ao <code>Mailjet</code>, garantindo entrega confiável e rápida. O token de reset é único, expira em 2 horas e só pode ser usado uma vez. Para evitar abusos, há limitação de tentativas por IP (rate limiting). O sistema também orienta o usuário a verificar a caixa de spam/lixeira.
+</p>
 
 <img src="assets/corsEco.png" alt="Configuração CORS segura no backend" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
 
@@ -126,6 +133,7 @@ eco/
 │   │   ├── controller-auth.ts
 │   │   ├── controller-eco.ts
 │   │   ├── controller-register.ts
+|   |   |-- controller-password-reset.ts
 │   │   ├── controller-sussurro.ts
 │   │   └── controller-tag.ts
 │   ├── database/
@@ -135,10 +143,6 @@ eco/
 │   │   │   ├── 20250622001613_create-sussuro.ts
 │   │   │   ├── 20250623093355_create-tags.ts
 │   │   │   └── 20250623093554_create-eco_tags.ts
-│   │   ├── seeds/
-│   │   │   ├── 001_tags.ts
-│   │   │   ├── 002_users.ts
-│   │   │   └── 003_ecos.ts
 │   │   └── knex.ts
 │   ├── middlewares/
 │   │   ├── ensureAuthenticated.ts
@@ -146,8 +150,6 @@ eco/
 │   │   ├── notFoundHandler.ts
 │   │   ├── rateLimiter.ts
 │   │   └── verifyUserAuthorization.ts
-│   ├── notas/
-│   │   └── JWT_IMPLEMENTACAO.md
 │   ├── routes/
 │   │   ├── auth-routes.ts
 │   │   ├── eco-routes.ts
@@ -155,12 +157,14 @@ eco/
 │   │   ├── index.ts
 │   │   ├── logout-routes.ts
 │   │   ├── profile-routes.ts
+|   |   ├── password-reset-routes.ts
 │   │   ├── register-routes.ts
 │   │   ├── sussurro-eco.ts
 │   │   ├── swagger-routes.ts
 │   │   └── tag-routes.ts
 │   ├── utils/
 │   │   └── AppError.ts
+|   |   └── emailService.ts
 │   └── app.ts
 ├── tests/
 │   ├── auth.test.ts
