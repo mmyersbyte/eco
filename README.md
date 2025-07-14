@@ -38,6 +38,7 @@ Eco Histórias
 <p> 
 O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para compartilhamento anônimo de histórias, priorizando privacidade, conforto emocional e navegação simples. O anonimato é garantido por codinomes e avatares fixos, sem nomes ou perfis personalizáveis, com autenticação via e-mail apenas para moderação básica, sem qualquer integração externa. Cada publicação (“Eco”) possui comentários limitados e é categorizada por tags sensíveis, evitando gamificação e exposição excessiva. A arquitetura utiliza React Native e React no frontend (repositórios privados devido ao foco em backend), enquanto a API é construída com Node.js, Express e PostgreSQL, com armazenamento de avatares em AWS S3 e deploy automatizado via Docker. Todo o desenvolvimento segue princípios de segurança, modularidade e respeito à privacidade, com documentação clara no Swagger, testes automatizados via Vitest e uso de Knex Query Builder. O projeto é backend focus e não citarei o desenvolvimento front-end ao decorrer. 
 </p>
+<span>Essa é a BRANCH de desenvolvimento. Alterações como Esqueci Senha, Swagger Atualizado, e novas funcionalidades estão na Branch de production</span>
 <p>
   Para conhecer a filosofia do projeto, confira o artigo publicado no 
   <a href="https://medium.com/@pedrojson/programei-uma-rede-social-do-zero-e-vou-te-mostrar-como-ela-funciona-689b8f558f33" target="_blank">Medium</a>.
