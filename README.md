@@ -4,9 +4,6 @@ Eco Histórias
 
 <p align="center"><em>Vozes sem Ego.</em></p>
 
-
-
-
 <div align="center">
   <!-- Linha 1 -->
   <img src="https://img.shields.io/badge/TYPESCRIPT-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TYPESCRIPT">
@@ -37,8 +34,6 @@ Eco Histórias
   <img src="./assets/202507082229.gif" alt="Demonstração do Eco" />
 </p>
 
-
-
 <h2>Objetivo do Projeto</h2> 
 <p> 
 O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para compartilhamento anônimo de histórias, priorizando privacidade, conforto emocional e navegação simples. O anonimato é garantido por codinomes e avatares fixos, sem nomes ou perfis personalizáveis, com autenticação via e-mail apenas para moderação básica, sem qualquer integração externa. Cada publicação (“Eco”) possui comentários limitados e é categorizada por tags sensíveis, evitando gamificação e exposição excessiva. A arquitetura utiliza React Native e React no frontend (repositórios privados devido ao foco em backend), enquanto a API é construída com Node.js, Express e PostgreSQL, com armazenamento de avatares em AWS S3 e deploy automatizado via Docker. Todo o desenvolvimento segue princípios de segurança, modularidade e respeito à privacidade, com documentação clara no Swagger, testes automatizados via Vitest e uso de Knex Query Builder. O projeto é backend focus e não citarei o desenvolvimento front-end ao decorrer. 
@@ -60,16 +55,19 @@ O Eco tem como objetivo desenvolver uma plataforma mobile e web minimalista para
   <strong>Observação:</strong> As rotas para listar usuários e publicar Ecos foram removidas da branch de produção! Elas foram utilizadas apenas para debug e testes. Não estão documentadas no Swagger por não serem oficiais, mas ainda permanecem disponíveis na branch de desenvolvimento (<code>main</code>).
 </p>
 
-
 <h2>Autenticação e Segurança</h2> 
-<p> A autenticação <code>JWT</code> utiliza <strong>cookies httpOnly</strong> para armazenar o token de sessão, aumentando a segurança contra ataques XSS. O backend faz uso do middleware <code>cookie-parser</code> para leitura dos cookies em rotas protegidas, enquanto o frontend foi adaptado para não manipular tokens diretamente, empregando <code>credentials: 'include'</code> em todas as requisições autenticadas. Variáveis sensíveis são gerenciadas via <code>dotenv</code> e as senhas são sempre armazenadas de forma hasheada com <code>bcrypt</code>. <code>CORS</code> é habilitado para integração frontend/backend com controle de origem.</p> <p> Adicionalmente, a API utiliza <code>helmet</code> para reforçar os headers de segurança HTTP, <code>rate limiting</code> para limitar requisições e evitar abusos/brute force, e <code>zod</code> para validação robusta dos dados de entrada em todas as rotas públicas e protegidas. </p>
+<p> A autenticação <code>JWT</code> utiliza <strong>cookies httpOnly</strong> para armazenar o token de sessão, aumentando a segurança contra ataques XSS. O backend faz uso do middleware <code>cookie-parser</code> para leitura dos cookies em rotas protegidas, enquanto o frontend foi adaptado para não manipular tokens diretamente, empregando <code>credentials: 'include'</code> em todas as requisições autenticadas. Variáveis sensíveis são gerenciadas via <code>dotenv</code> e as senhas são sempre armazenadas de forma hasheada com <code>bcrypt</code>. <code>CORS</code> é habilitado para integração frontend/backend com controle de origem.</p> 
+<p> Adicionalmente, a API utiliza <code>helmet</code> para reforçar os headers de segurança HTTP, <code>rate limiting</code> para limitar requisições e evitar abusos/brute force, e <code>zod</code> para validação robusta dos dados de entrada em todas as rotas públicas e protegidas. </p>
+
+<p>
+  <strong>Recuperação de Senha:</strong> O backend implementa um fluxo seguro de "esqueci minha senha", onde o usuário recebe um e-mail com um link temporário para redefinir sua senha. O envio é feito via <code>Nodemailer</code> integrado ao <code>Mailjet</code>, garantindo entrega confiável e rápida. O token de reset é único, expira em 2 horas e só pode ser usado uma vez. Para evitar abusos, há limitação de tentativas por IP (rate limiting). O sistema também orienta o usuário a verificar a caixa de spam/lixeira.
+</p>
 
 <img src="assets/corsEco.png" alt="Configuração CORS segura no backend" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
 
 <h2>Database</h2> 
 <p> O banco de dados do projeto é estruturado em <code>PostgreSQL</code>, com modelagem relacional. O acesso ao banco e a construção de queries utilizam o <code>Knex Query Builder</code>, o que facilita a manutenção, migrações e padronização das operações SQL. Durante o desenvolvimento, utilizei o <code>pgAdmin</code> para gerenciamento local, mas, na branch de produção, optei pelo <strong>Neon</strong> como solução de PostgreSQL em nuvem, garantindo alta disponibilidade, backups automáticos e integração eficiente com o backend.</p>
 <img src="assets/schemasEco.png" alt="Configuração CORS segura no backend" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
-
 
 <h2>Testes</h2> 
 <p>Os testes automatizados da API são implementados com <code>Vitest</code>, proporcionando cobertura eficiente de rotas, serviços e middlewares, com execução rápida e integração ao fluxo de desenvolvimento. Todo o backend é desenvolvido em <code>TypeScript</code>, garantindo tipagem estática, melhor organização do código e redução de bugs durante o desenvolvimento e manutenção da aplicação.
@@ -92,14 +90,14 @@ secure: true
 
 <p>No frontend, (<code>Axios</code>) usei `credentials: 'include'` nas requisições autenticadas.
 
-> - Frontend: `https://ecohistorias.com.br`  
-> - Backend: `https://api.ecohistorias.com.br`  
-> - Cookie: `domain: '.ecohistorias.com.br'`  
+> - Frontend: `https://ecohistorias.com.br`
+> - Backend: `https://api.ecohistorias.com.br`
+> - Cookie: `domain: '.ecohistorias.com.br'`
 > - Ambos em HTTPS
 
 Assim, a autenticação via cookie funcionará perfeitamente e de forma segura!
-</p>
 
+</p>
 
 <h2> Como rodar a branch de desenvolvimento (MAIN) localmente com Docker Compose</h2>
 <p>
@@ -190,5 +188,3 @@ eco/
 ├── tsconfig.json
 └── vitest.config.ts
 ```
-
-
