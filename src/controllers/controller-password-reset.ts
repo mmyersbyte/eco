@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { z } from 'zod';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
-import { sendMail } from '../utils/emailService.js';
+import { resetPasswordEmailTemplate, sendMail } from '../utils/emailService.js';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: 'Email inválido.' }),
@@ -40,7 +40,9 @@ class PasswordResetController {
       }
       // Gera token
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+      const expiresInMs =
+        Number(process.env.RESET_TOKEN_EXPIRES_MS) || 2 * 60 * 60 * 1000; // 2 horas padrão
+      const expiresAt = new Date(Date.now() + expiresInMs); // 2 horas
       await knexInstance('password_reset_tokens').insert({
         id: crypto.randomUUID(),
         user_id: user.id,
@@ -55,7 +57,7 @@ class PasswordResetController {
       await sendMail({
         to: email,
         subject: 'Redefinição de senha - Eco Histórias',
-        html: `<p>Você solicitou a redefinição de senha. Clique no link abaixo para criar uma nova senha:</p><p><a href="${resetLink}">${resetLink}</a></p><p>Se não foi você, ignore este e-mail.</p>`,
+        html: resetPasswordEmailTemplate(resetLink),
       });
       return res.json({
         message:
