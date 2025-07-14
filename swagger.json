@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "Documentação da API ECO."
   },
-  "servers": [{ "url": "http://localhost:4000" }],
+  "servers": [{ "url": "https://api.ecohistorias.com.br/" }],
   "tags": [
     { "name": "Auth", "description": "Autenticação e registro" },
     { "name": "Eco", "description": "Ecos (posts)" },
