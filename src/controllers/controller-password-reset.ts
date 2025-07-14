@@ -61,7 +61,7 @@ class PasswordResetController {
       });
       return res.json({
         message:
-          'Se o e-mail existir, enviaremos instruções para redefinir a senha.',
+          'Se o e-mail existir, enviaremos instruções para redefinir a senha. Verifique sua caixa de entrada.',
       });
     } catch (error) {
       next(error);

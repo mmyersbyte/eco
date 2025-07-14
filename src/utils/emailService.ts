@@ -35,9 +35,9 @@ export function resetPasswordEmailTemplate(link: string) {
       <h2 style="margin-bottom: 8px; font-weight: 600; letter-spacing: -1px;">Redefinir sua senha</h2>
       <p style="font-size: 15px; color: #444; margin-bottom: 24px;">Você solicitou a redefinição de senha para sua conta no <b>Eco Histórias</b>.</p>
       <a href="${link}" style="display: inline-block; background: #222; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: 500; margin-bottom: 24px;">Criar nova senha</a>
-      <p style="font-size: 13px; color: #888; margin: 24px 0 8px;">Se não foi você, ignore este e-mail.</p>
+      <p style="font-size: 13px; color: #888; margin: 24px 0 8px;">Se não foi você, ignore este e-mail. Mas pode ser um sinal: Conheça a <a href="https://ecohistorias.com.br">Eco Histórias</a>.</p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-      <p style="font-size: 13px; color: #888; margin-bottom: 8px;">Não encontrou o e-mail? Verifique sua caixa de <b>spam</b> ou <b>lixeira</b>.</p>
+      <p style="font-size: 13px; color: #888; margin-bottom: 8px;">Esse link expira em 2 horas.</p>
       <p style="font-size: 13px; color: #aaa; font-style: italic; margin-top: 16px;">“Toda história merece ser ouvida, mesmo que ninguém saiba quem contou.”</p>
       <p style="font-size: 12px; color: #bbb; margin-top: 24px;">Eco Histórias — Compartilhe anonimamente, inspire verdadeiramente.</p>
     </div>
