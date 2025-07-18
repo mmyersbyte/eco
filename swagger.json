@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Eco API",
+    "title": "Eco API - Backend Minimalista para Histórias Anônimas",
     "version": "1.0.0",
-    "description": "Documentação da API ECO."
+    "description": "Esta é a documentação oficial da API da Eco, uma plataforma minimalista e anônima para o compartilhamento de histórias pessoais. A API foi construída com foco em segurança, privacidade, performance e boas práticas de desenvolvimento backend. Aqui você encontrará os endpoints para criação de usuários anônimos, postagens, comentários ('sussurros'), autenticação JWT, e integrações com banco de dados PostgreSQL."
   },
   "servers": [{ "url": "https://api.ecohistorias.com.br/" }],
   "tags": [
