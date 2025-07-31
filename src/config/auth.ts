@@ -1,9 +1,8 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { env } from '../env.js';
 export const authConfig = {
   jwt: {
-    secret: String(process.env.AUTH_SECRET || 'default'),
-    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+    secret: env.JWT_SECRET,
+    expiresIn: '1d',
     path: '/',
   },
 };

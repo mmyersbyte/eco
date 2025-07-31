@@ -9,17 +9,19 @@ import { AppError } from '../utils/AppError.js';
 
 class AuthController {
   // Esquema de validação para login
-  private static loginSchema = z.object({
-    email: z.string().email({ message: 'Email inválido.' }),
-    senha: z
-      .string()
-      .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
-  });
 
   async auth(request: Request, response: Response, next: NextFunction) {
+    const loginSchema = z.object({
+      email: z.string().email({ message: 'Email inválido.' }),
+      senha: z
+        .string()
+        .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
+    });
+
     try {
       // Validação dos dados recebidos
-      const validation = AuthController.loginSchema.safeParse(request.body);
+      const validation = loginSchema.safeParse(request.body);
+
       if (!validation.success) {
         const errorMessage =
           validation.error.errors[0]?.message || 'Dados inválidos.';
@@ -46,10 +48,10 @@ class AuthController {
       // Gera o token JWT apenas com o id do usuário
       const token = jwt.sign(
         {}, // Payload vazio, pois só há um tipo de usuário
-        String(authConfig.jwt.secret),
+        authConfig.jwt.secret,
         {
-          subject: String(user.id), // ID do usuário como subject
-          expiresIn: authConfig.jwt.expiresIn as unknown as string, // Corrigido: cast para string
+          subject: user.id, // ID do usuário como subject
+          expiresIn: authConfig.jwt.expiresIn, // Corrigido: cast para string
         }
       );
 
