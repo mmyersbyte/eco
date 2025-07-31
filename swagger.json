@@ -246,6 +246,9 @@
           "200": { "description": "Eco atualizado com sucesso" },
           "400": { "description": "Erro de validação" },
           "401": { "description": "Não autenticado" },
+          "403": {
+            "description": "Você não tem permissão para editar este eco."
+          },
           "404": { "description": "Eco não encontrado" }
         }
       },
@@ -264,6 +267,9 @@
         "responses": {
           "200": { "description": "Eco deletado com sucesso" },
           "401": { "description": "Não autenticado" },
+          "403": {
+            "description": "Você não tem permissão para deletar este eco."
+          },
           "404": { "description": "Eco não encontrado" }
         }
       }
@@ -363,6 +369,9 @@
           "200": { "description": "Comentário atualizado com sucesso" },
           "400": { "description": "Erro de validação" },
           "401": { "description": "Não autenticado" },
+          "403": {
+            "description": "Você não tem permissão para editar este comentário."
+          },
           "404": { "description": "Comentário não encontrado" }
         }
       },
@@ -381,6 +390,9 @@
         "responses": {
           "200": { "description": "Comentário deletado com sucesso" },
           "401": { "description": "Não autenticado" },
+          "403": {
+            "description": "Você não tem permissão para deletar este comentário."
+          },
           "404": { "description": "Comentário não encontrado" }
         }
       }

@@ -207,6 +207,11 @@ class EcoController {
         throw new AppError('Eco não encontrado.', 404);
       }
 
+      // Só o dono pode editar
+      if (ecoExists.user_id !== request.user?.id) {
+        throw new AppError('Você não tem permissão para editar este eco.', 403);
+      }
+
       // Atualiza o eco (apenas threads)
       const [eco] = await knexInstance<Eco>('eco')
         .where({ id })
@@ -239,6 +244,15 @@ class EcoController {
       if (!ecoExists) {
         throw new AppError('Eco não encontrado.', 404);
       }
+
+      // Só o dono pode deletar
+      if (ecoExists.user_id !== request.user?.id) {
+        throw new AppError(
+          'Você não tem permissão para deletar este eco.',
+          403
+        );
+      }
+
       // Deleta o eco (eco_tags serão deletadas pelo CASCADE)
       await knexInstance<Eco>('eco').where({ id }).delete();
 

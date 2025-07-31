@@ -126,6 +126,14 @@ class SussurroController {
       if (!sussurroExists) {
         throw new AppError('Comentário não encontrado.', 404);
       }
+
+      // Só o dono pode editar
+      if (sussurroExists.user_id !== request.user?.id) {
+        throw new AppError(
+          'Você não tem permissão para editar este comentário.',
+          403
+        );
+      }
       const [sussurro] = await knexInstance<Sussurro>('sussurro')
         .where({ id })
         .update(updateData)
@@ -148,6 +156,14 @@ class SussurroController {
         .first();
       if (!sussurroExists) {
         throw new AppError('Comentário não encontrado.', 404);
+      }
+
+      // Só o dono pode deletar
+      if (sussurroExists.user_id !== request.user?.id) {
+        throw new AppError(
+          'Você não tem permissão para deletar este comentário.',
+          403
+        );
       }
       await knexInstance<Sussurro>('sussurro').where({ id }).delete();
       return response.json({ message: 'Comentário deletado com sucesso!' });
