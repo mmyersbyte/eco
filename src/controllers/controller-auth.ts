@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { Register } from '../@types/register.d.ts';
 import { authConfig } from '../config/auth.js';
 import { knexInstance } from '../database/knex.js';
+import { env } from '../env.js';
 import { AppError } from '../utils/AppError.js';
 
 class AuthController {
@@ -48,7 +49,7 @@ class AuthController {
       // Gera o token JWT apenas com o id do usuário
       const token = jwt.sign(
         {}, // Payload vazio, pois só há um tipo de usuário
-        authConfig.jwt.secret,
+        env.AUTH_SECRET,
         {
           subject: user.id, // ID do usuário como subject
           expiresIn: authConfig.jwt.expiresIn, // Corrigido: cast para string
