@@ -1,11 +1,12 @@
 import type { Register } from '@/@types/register.ts';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
 import { authConfig } from '../config/auth.js';
 import { knexInstance } from '../database/knex.js';
+import { env } from '../env.js';
 import { AppError } from '../utils/AppError.js';
 
 // Esquema de validação para registro
@@ -73,29 +74,35 @@ class RegisterController {
         .select('id', 'codinome', 'avatar_url', 'genero')
         .limit(1);
 
-      //] Gera o token JWT apenas com o id do usuário
-      const jwtOptions: SignOptions = {
-        expiresIn: authConfig.jwt.expiresIn as unknown as string,
-        subject: String(user.id),
-      };
+      // Gera o token JWT apenas com o id do usuário
+      const token = jwt.sign({}, env.AUTH_SECRET, {
+        subject: user.id,
+        expiresIn: authConfig.jwt.expiresIn,
+      });
 
-      const token = jwt.sign({}, String(authConfig.jwt.secret), jwtOptions);
-
-      //] Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
+      // Retorna o usuário criado (com id) e o token JWT no cookie httpOnly
       return response
         .cookie('token', token, {
-          httpOnly: true, // Só servidor acessa
-          secure: process.env.NODE_ENV === 'production', // HTTPS em prod
-          sameSite: 'lax', // Funciona para mesmo domínio
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
           domain:
             process.env.NODE_ENV === 'production'
               ? '.ecohistorias.com.br'
-              : undefined, // Compartilha entre subdomínios
+              : undefined,
           maxAge: 24 * 60 * 60 * 1000, // 24 horas
           path: '/',
         })
         .status(201)
-        .json({ message: 'Usuário registrado com sucesso!', user });
+        .json({
+          message: 'Usuário registrado com sucesso!',
+          user: {
+            id: user.id,
+            codinome: user.codinome,
+            avatar_url: user.avatar_url,
+            genero: user.genero,
+          },
+        });
     } catch (error) {
       next(error);
     }
