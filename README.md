@@ -1,5 +1,5 @@
 <h1 align="center">
-Eco Histórias
+Eco Histórias - API
 </h1>
 
 <p align="center"><em>Vozes sem Ego.</em></p>
