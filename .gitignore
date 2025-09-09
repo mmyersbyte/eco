@@ -1,4 +1,8 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+notas
+notas/
+json.txt/
+json-arquivos.txt/
 
 # Dependencies
 node_modules/
