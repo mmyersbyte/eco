@@ -1,5 +1,4 @@
 import type { Register } from '@/@types/register.ts';
-import { registerSchema } from '@/validators/register-validator.js';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
@@ -8,6 +7,7 @@ import { authConfig } from '../config/auth.js';
 import { knexInstance } from '../database/knex.js';
 import { env } from '../env.js';
 import { AppError } from '../utils/AppError.js';
+import { registerSchema } from '../validators/register-validator.js';
 
 class RegisterController {
   async create(request: Request, response: Response, next: NextFunction) {

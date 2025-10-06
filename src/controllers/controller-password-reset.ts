@@ -1,13 +1,13 @@
-import {
-  forgotPasswordSchema,
-  resetPasswordSchema,
-} from '@/validators/password-reset-validator.js';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
 import { resetPasswordEmailTemplate, sendMail } from '../utils/emailService.js';
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '../validators/password-reset-validator.js';
 
 class PasswordResetController {
   // 1. Solicitar reset de senha

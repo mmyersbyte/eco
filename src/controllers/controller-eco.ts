@@ -1,11 +1,9 @@
 import type { Eco } from '@/@types/eco.ts';
-import { ecoSchema, ecoUpdateSchema } from '@/validators/eco-validator.js';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
-
-// Schema Zod para criação de eco (recebe array de tag_ids, não mais nomes)
+import { ecoSchema, ecoUpdateSchema } from '../validators/eco-validator.js';
 
 class EcoController {
   /**

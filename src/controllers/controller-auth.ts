@@ -1,4 +1,5 @@
-import { loginSchema } from '@/validators/auth-validator.js';
+import { loginSchema } from '../validators/auth-validator.js';
+
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';

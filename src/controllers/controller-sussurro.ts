@@ -1,9 +1,9 @@
 import type { Sussurro } from '@/@types/sussurro.js';
-import { sussurroSchema } from '@/validators/sussurro-validator.js';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
+import { sussurroSchema } from '../validators/sussurro-validator.js';
 
 class SussurroController {
   // Listar todos os sussurros (ou listar por eco, se quiser)
