@@ -17,10 +17,9 @@ const routes = Router();
 
 routes.use(helmet());
 
-// Health check - sem rate limiting para monitoramento
+routes.use(rateLimiter);
 routes.use('/health', healthRoutes);
 
-routes.use(rateLimiter);
 routes.use('/register', registerRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/eco', ecoRoutes);
@@ -29,9 +28,7 @@ routes.use('/profile', profileRoutes);
 routes.use('/logout', logoutRoutes);
 routes.use('/tags', tagRoutes);
 routes.use('/password', passwordResetRoutes);
-routes.use(swaggerRoutes);
-
-routes.use(rateLimiter);
+routes.use('/docs', swaggerRoutes);
 routes.use(notFoundHandler);
 
 export { routes };

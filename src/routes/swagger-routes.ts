@@ -11,6 +11,6 @@ const swaggerDocument = JSON.parse(
 );
 
 // Rota para documentação interativa
-swaggerRoutes.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+swaggerRoutes.use(swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 export { swaggerRoutes };
