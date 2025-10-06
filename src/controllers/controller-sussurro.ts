@@ -1,18 +1,9 @@
 import type { Sussurro } from '@/@types/sussurro.js';
+import { sussurroSchema } from '@/validators/sussurro-validator.js';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
-import { z } from 'zod';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
-
-// Validação do sussurro (comentário)
-const sussurroSchema = z.object({
-  eco_id: z.string().uuid({ message: 'ID do eco inválido.' }),
-  conteudo: z
-    .string()
-    .min(1, { message: 'Comentário obrigatório.' })
-    .max(144, { message: 'Comentário pode ter até 144 caracteres.' }),
-});
 
 class SussurroController {
   // Listar todos os sussurros (ou listar por eco, se quiser)

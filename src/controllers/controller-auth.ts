@@ -1,24 +1,16 @@
+import { loginSchema } from '@/validators/auth-validator.js';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { z } from 'zod';
 import type { Register } from '../@types/register.d.ts';
 import { authConfig } from '../config/auth.js';
 import { knexInstance } from '../database/knex.js';
 import { env } from '../env.js';
 import { AppError } from '../utils/AppError.js';
-
 class AuthController {
   // Esquema de validação para login
 
   async auth(request: Request, response: Response, next: NextFunction) {
-    const loginSchema = z.object({
-      email: z.string().email({ message: 'Email inválido.' }),
-      senha: z
-        .string()
-        .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
-    });
-
     try {
       // Validação dos dados recebidos
       const validation = loginSchema.safeParse(request.body);

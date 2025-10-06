@@ -1,32 +1,13 @@
 import type { Register } from '@/@types/register.ts';
+import { registerSchema } from '@/validators/register-validator.js';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
-import { z } from 'zod';
 import { authConfig } from '../config/auth.js';
 import { knexInstance } from '../database/knex.js';
 import { env } from '../env.js';
 import { AppError } from '../utils/AppError.js';
-
-// Esquema de validação para registro
-const registerSchema = z.object({
-  email: z.string().email({ message: 'Email inválido.' }),
-  senha: z
-    .string()
-    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
-  // Codinome: apenas letras, números e underline (_), sem espaços ou símbolos especiais
-  codinome: z
-    .string()
-    .min(3, { message: 'Codinome obrigatório.' })
-    .max(20, { message: 'Codinome deve ter no máximo 20 caracteres.' })
-    .regex(/^[a-zA-Z0-9_]+$/, {
-      message:
-        'Codinome só pode conter letras, números e underline (_), sem espaços ou símbolos.',
-    }),
-  genero: z.enum(['M', 'F', 'O'], { message: 'Gênero inválido.' }),
-  avatar_url: z.string().url({ message: 'URL do avatar inválida.' }),
-});
 
 class RegisterController {
   async create(request: Request, response: Response, next: NextFunction) {

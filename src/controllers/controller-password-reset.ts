@@ -1,21 +1,13 @@
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '@/validators/password-reset-validator.js';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'node:crypto';
-import { z } from 'zod';
 import { knexInstance } from '../database/knex.js';
 import { AppError } from '../utils/AppError.js';
 import { resetPasswordEmailTemplate, sendMail } from '../utils/emailService.js';
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: 'Email inválido.' }),
-});
-
-const resetPasswordSchema = z.object({
-  token: z.string().min(32, { message: 'Token inválido.' }),
-  newPassword: z
-    .string()
-    .min(6, { message: 'Senha deve ter pelo menos 6 caracteres.' }),
-});
 
 class PasswordResetController {
   // 1. Solicitar reset de senha
