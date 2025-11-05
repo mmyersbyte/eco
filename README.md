@@ -102,10 +102,6 @@ Assim, a autenticação via cookie funcionará perfeitamente e de forma segura!
 <h2>Ferramenta 5W2H para facilitar o desenvolvimento</h2>
 <img src="assets/ecohistorias.drawio.png" alt="5W2H" width="700" height="auto" style="border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);" />
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 <h2> Como rodar a branch de desenvolvimento (MAIN) localmente com Docker Compose</h2>
 <p>
   <strong>Pré-requisitos:</strong><br>
